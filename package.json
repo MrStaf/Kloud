@@ -1,0 +1,25 @@
+{
+  "name": "kloud",
+  "version": "1.0.0",
+  "description": "Kloud is a fast and secure way to host your photos. Photos will be encrypted and available everywhere in the world.",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "scripts": {
+    "start": "",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MrStaf/Kloud.git"
+  },
+  "keywords": [],
+  "author": "MrStaf",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MrStaf/Kloud/issues"
+  },
+  "homepage": "https://github.com/MrStaf/Kloud#readme"
+}
