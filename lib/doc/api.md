@@ -14,6 +14,8 @@
   - [4.3. Read all photos](#43-read-all-photos)
   - [4.4. Get all photos from an album](#44-get-all-photos-from-an-album)
   - [4.5. Delete photo](#45-delete-photo)
+  - [4.6. Add to favorite](#46-add-to-favorite)
+  - [4.7. Remove from favorite](#47-remove-from-favorite)
 
 <br/>
 
@@ -291,5 +293,67 @@ Return:
 {
   "status": "SUCCESS",
   "message": "File successfully deleted."
+}
+```
+<br />
+
+## 4.6. Add to favorite
+```http
+PATCH /api/photos/fav/add
+```
+Header:
+```js
+{
+    "auth-token": String
+}
+```
+Body:
+```js
+{
+    "photoId": String
+}
+```
+Example: 
+```json
+{
+    "auth-token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MTZjMGVmZTc3MDI2MjcyYjI0Y2Q1ZWEiLCJpYXQiOjE2MzQ0NzE4NTd9.SRX7UOWxVyFG4IFyqvW9NXIp3nEgFAw-AEeqb94wHT0"
+}
+```
+Return:   
+```json
+{
+  "status": "SUCCESS",
+  "message": "Photo successfully added to favorite"
+}
+```
+<br />
+
+## 4.7. Remove from favorite
+```http
+PATCH /api/photos/fav/remove
+```
+Header:
+```js
+{
+    "auth-token": String
+}
+```
+Body:
+```js
+{
+    "photoId": String
+}
+```
+Example: 
+```json
+{
+    "auth-token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MTZjMGVmZTc3MDI2MjcyYjI0Y2Q1ZWEiLCJpYXQiOjE2MzQ0NzE4NTd9.SRX7UOWxVyFG4IFyqvW9NXIp3nEgFAw-AEeqb94wHT0"
+}
+```
+Return:   
+```json
+{
+  "status": "SUCCESS",
+  "message": "Photo successfully removed to favorite"
 }
 ```
