@@ -8,6 +8,8 @@
   - [3.1. Register account](#31-register-account)
   - [3.2. Sign in account](#32-sign-in-account)
   - [3.3. Delete account](#33-delete-account)
+  - [3.4. Get account](#34-get-account)
+  - [3.5. Edit account](#35-edit-account)
 - [4. Photos](#4-photos)
   - [4.1. Upload](#41-upload)
   - [4.2. Read a photo](#42-read-a-photo)
@@ -16,6 +18,11 @@
   - [4.5. Delete photo](#45-delete-photo)
   - [4.6. Add to favorite](#46-add-to-favorite)
   - [4.7. Remove from favorite](#47-remove-from-favorite)
+  - [4.8. Update photo description](#48-update-photo-description)
+- [5. Albums](#5-albums)
+  - [5.1. Create album](#51-create-album)
+  - [5.2. Delete album](#52-delete-album)
+  - [5.3. Update album name](#53-update-album-name)
 
 <br/>
 
@@ -148,6 +155,74 @@ Return:
 {
   "status": "SUCCESS",
   "message": "User successfully deleted."
+}
+```
+<br/>
+
+## 3.4. Get account
+
+```http
+GET /api/user/
+```
+Header:
+```js
+{
+    "auth-token": String
+}
+```
+Example: 
+```json
+{
+    "auth-token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MTZjMGVmZTc3MDI2MjcyYjI0Y2Q1ZWEiLCJpYXQiOjE2MzQ0NzE4NTd9.SRX7UOWxVyFG4IFyqvW9NXIp3nEgFAw-AEeqb94wHT0"
+}
+```
+Return:
+```json
+{
+  "status": "SUCCESS",
+  "message": "User successfully found",
+  "data": {
+    "firstName": "Jean",
+    "lastName": "Test",
+    "email": "123@a.fr",
+    "photoToken": "2d45a82b-36e8-4bcc-8322-44ce6346c412"
+  }
+}
+```
+## 3.5. Edit account
+
+```http
+PATCH /api/user/
+```
+Header:
+```js
+{
+    "auth-token": String
+}
+```
+Body:
+```js
+{
+    "firstName": String,
+    "lastName": String,
+    "email": String,
+    "password": String
+}
+```
+Example: 
+```json
+{
+    "firstName": "JeanM",
+    "lastName": "Test ",
+    "email": "123@abracadabra.fr",
+    "password": "Test123@"
+}
+```
+Return:
+```json
+{
+  "status": "SUCCESS",
+  "message": "User successfully updated"
 }
 ```
 <br/>
@@ -355,5 +430,137 @@ Return:
 {
   "status": "SUCCESS",
   "message": "Photo successfully removed to favorite"
+}
+```
+<br />
+
+## 4.8. Update photo description
+```http
+PATCH /api/photos/desc
+```
+Header:
+```js
+{
+    "auth-token": String
+}
+```
+Body:
+```js
+{
+    "photoId": String,
+    "description": String,
+}
+```
+Example: 
+```json
+{
+    "photoId": "616c86e523ecfb23fb4f5fb6",
+    "description": "New description"
+}
+```
+Return:   
+```json
+{
+  "status": "SUCCESS",
+  "message": "Description successfully changed"
+}
+```
+<br />
+
+# 5. Albums
+<br />
+
+## 5.1. Create album
+```http
+POST /api/album/
+```
+Header:
+```js
+{
+    "auth-token": String
+}
+```
+Body:
+```js
+{
+    "name": String
+}
+```
+Example: 
+```json
+{
+    "name": "New album"
+}
+```
+Return:   
+```json
+{
+  "status": "SUCCESS",
+  "message": "Album created successfully",
+  "data": {
+    "_id": "616d8b6f7d85864ac2c36faf",
+    "userId": "616c80b9e2ed3a1f51459fb6",
+    "name": "New album",
+    "date": "2021-10-18T14:57:51.000Z",
+    "__v": 0
+  }
+}
+```
+<br />
+
+## 5.2. Delete album
+```http
+DELETE /api/album/id/:id
+```
+Header:
+```js
+{
+    "auth-token": String
+}
+```
+Return:   
+```json
+{
+  "status": "SUCCESS",
+  "message": "Album successfully deleted"
+}
+```
+<br />
+
+## 5.3. Update album name
+```http
+PATCH /api/album/desc
+```
+Header:
+```js
+{
+    "auth-token": String
+}
+```
+Body:
+```js
+{
+    "name": String
+}
+```
+Example: 
+```json
+{
+    "albumId": "616d8b6f7d85864ac2c36faf",
+    "name": "test"
+}
+```
+Return:   
+```json
+{
+  "status": "SUCCESS",
+  "message": "Album name successfully changed",
+  "data": {
+    "_id": "6164b53723e5d7284b214a50",
+    "userId": "616c80b9e2ed3a1f51459fb6",
+    "name": "test",
+    "date": "2021-10-11T22:05:43.000Z",
+    "__v": 0
+  }
 }
 ```
