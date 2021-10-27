@@ -35,7 +35,7 @@ export default function Register({ navigation }) {
         <Field title="Confirm Password" type="password"/>
       </View>
       <View>
-        <View style={tw`flex-row justify-center flex-1 w-64`}>
+        <View style={tw`flex-row justify-center w-64`}>
           <Text style={tw`text-[#777777]`}>Have an account ? </Text>
           <TouchableHighlight onPress={() => {
             navigation.navigate("SignIn");

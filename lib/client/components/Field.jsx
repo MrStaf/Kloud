@@ -2,26 +2,22 @@ import React, { useState } from "react";
 import { Text, TextInput, View } from "react-native";
 import tw from "twrnc";
 
-export default function Field({ title, autoComplete, type }) {
-  const [text, setText] = useState("");
+export default function Field({ title, autoComplete, type, value, setValue }) {
   const [borderSize, setBorderSize] = useState(1);
   const isPassword = type === "password";
   return (
     <View>
       <TextInput
-        style={{
-          height: "3.25rem",
-          paddingHorizontal: "1.5rem",
+        onChange={(e) => console.log(e)}
+        style={[tw`w-64 px-6 mb-5 h-14`,{
           backgroundColor: "#fff",
           borderRadius: 15,
           borderColor: "#60AEC2",
           borderWidth: borderSize,
-          outline: "none",
-          marginBottom: "1.2rem",
-        }}
+        }]}
         secureTextEntry={isPassword}
-        onChangeText={(text) => setText(text)}
-        defaultValue={text}
+        onChangeText={(text) => setValue(text)}
+        defaultValue={value}
         placeholder={title}
         onFocus={() => {
           setBorderSize(2);
