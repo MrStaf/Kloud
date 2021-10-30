@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Text, View, Image, Pressable } from "react-native";
 import tw from "twrnc";
 import { StatusBar } from "expo-status-bar";
+import * as SecureStore from "expo-secure-store";
 
 // Images
 import logo from "./../assets/logo.png";
@@ -58,9 +59,39 @@ const Dots = ({ pass }) => {
   );
 };
 
+async function save(key, value) {
+  await SecureStore.setItemAsync(key, JSON.stringify(value));
+}
+
+const handleLogIn = (password, navigation) => {
+  if (password.length < 3) {
+    return;
+  }
+  SecureStore.getItemAsync("pass_").then((data) => {
+    if (password.join("") === data.split('"').join("")) {
+      navigation.navigate("Home");
+    }
+  });
+};
+
+const handleCreatePassword = (password) => {
+  if (password.length < 3) {
+    return;
+  }
+  save("pass_", password.join(""));
+};
+
 export default function Authentication({ navigation }) {
   const [pass, setPass] = useState([]);
-
+  const [hasPass, setHasPass] = useState(false);
+  useEffect(() => {
+    const hasSavedPass = async () => {
+      const log = await SecureStore.getItemAsync("pass_");
+      console.log(log);
+      setHasPass(log !== null);
+    };
+    hasSavedPass();
+  }, []);
   return (
     <View
       style={tw`flex-1 items-center justify-between px-8 py-16 bg-[#F3F0E6] dark:bg-[#252525]`}
@@ -72,7 +103,7 @@ export default function Authentication({ navigation }) {
           style={{ width: 400, height: 65, resizeMode: "contain" }}
         />
         <Text style={tw`font-bold text-3xl text-[#60AEC2] mx-8 mt-4`}>
-          Authentication required
+          {hasPass ? "Authentication required" : "Create your code"}
         </Text>
       </View>
       <View style={tw`justify-center`}>
@@ -93,20 +124,33 @@ export default function Authentication({ navigation }) {
         </View>
       </View>
       <View>
-        <View style={tw`flex-row justify-center w-64`}>
-          <Pressable
-            onPress={() => {
-              navigation.navigate("Register");
-            }}
-          >
-            <Text style={tw`text-[#60AEC2] font-bold`}>Forgot ?</Text>
-          </Pressable>
-        </View>
-        <Pressable>
+        {hasPass && (
+          <View style={tw`flex-row justify-center w-64`}>
+            <Pressable
+              onPress={() => {
+                navigation.navigate("Register");
+              }}
+            >
+              <Text style={tw`text-[#60AEC2] font-bold`}>Forgot ?</Text>
+            </Pressable>
+          </View>
+        )}
+        <Pressable
+          onPress={() => {
+            if (hasPass) {
+              handleLogIn(pass, navigation);
+            } else {
+              handleCreatePassword(pass);
+            }
+            setPass([]);
+          }}
+        >
           <View
-            style={tw`w-full py-4 bg-[#60AEC2] flex items-center justify-center rounded-xl mt-2`}
+            style={tw`w-full py-4 bg-[#60AEC2] flex items-center justify-center rounded-xl mt-2 w-64`}
           >
-            <Text style={tw`text-[#fff]`}>Log In</Text>
+            <Text style={tw`text-[#fff]`}>
+              {hasPass ? "Log In" : "Create your code"}
+            </Text>
           </View>
         </Pressable>
       </View>
