@@ -1,5 +1,5 @@
 // React Native
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
 import {
   Text,
@@ -10,15 +10,21 @@ import {
   FlatList,
   SafeAreaView,
   RefreshControl,
+  Pressable,
 } from "react-native";
+import * as SecureStore from "expo-secure-store";
+
 // SVG
 import { SvgXml } from "react-native-svg";
+
 // Styles
 import tw from "twrnc";
 import { vw } from "react-native-expo-viewport-units";
 
 // Assets
 import { logout } from "./../assets/icons";
+
+// Effects
 
 const DATA = [
   {
@@ -82,11 +88,17 @@ const styles = StyleSheet.create({
   },
 });
 
-export default function Photos({ navigation }) {
+export default function Photos({ navigation, logged, setLogged }) {
   const [data, setData] = useState(DATA);
   const [selectedId, setSelectedId] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
-
+  // useLogin(navigation);
+  const handleLogOut = () => {
+    setLogged(false);
+    SecureStore.deleteItemAsync('user_');
+    SecureStore.deleteItemAsync('pass_');
+    navigation.navigate("LandPage")
+  }
   const onRefresh = () => {
     setRefreshing(true);
     setData([
@@ -115,6 +127,9 @@ export default function Photos({ navigation }) {
       />
     );
   };
+  useEffect(() => {
+    
+  }, [])
   return (
     <SafeAreaView
       style={tw`flex-1 items-center justify-between bg-[#F3F0E6] dark:bg-[#252525] pt-8`}
@@ -125,7 +140,9 @@ export default function Photos({ navigation }) {
           return (
             <View style={tw`flex-row justify-between w-full px-8 py-4`}>
               <Text style={tw`text-4xl text-[#333333]`}>Photos</Text>
-              <SvgXml xml={logout} width={40} height={40} />
+              <Pressable onPress={handleLogOut}>
+                <SvgXml xml={logout} width={40} height={40} />
+              </Pressable>
             </View>
           );
         }}
