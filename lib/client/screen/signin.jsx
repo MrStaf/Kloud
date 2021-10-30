@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Text, View, Image, TouchableHighlight } from "react-native";
 import tw from "twrnc";
 import { StatusBar } from "expo-status-bar";
-import axios from "axios";
+import * as SecureStore from "expo-secure-store";
 
 // Images
 import logo from "./../assets/logo.png";
@@ -10,25 +10,38 @@ import logo from "./../assets/logo.png";
 // Components
 import Field from "./../components/Field";
 
-const handleSignIn = async ({email, password}) => {
+async function save(key, value) {
+  await SecureStore.setItemAsync(key, value);
+}
 
+const handleSignIn = async (email, password, navigation) => {
   let headersList = {
     Accept: "*/*",
     "Content-Type": "application/json",
-    'Access-Control-Allow-Origin': '*',
   };
 
-  let reqOptions = {
-    url: "http://localhost:3000/api/user/signin",
+  fetch("https://kloud.benoit.fage.fr/api/user/signin", {
     method: "POST",
+    body: `{\n   \"email\": \"${email}\",\n  \"password\": \"${password}\"\n}`,
     headers: headersList,
-    data: `{\n    "email": ${email},\n    "password": ${password}\n}`,
-  };
-
-  axios.request(reqOptions).then(function (response) {
-    console.log(response.data);
-    alert("logged");
-  });
+  })
+    .then(function (response) {
+      return response.json();
+    })
+    .then((data) => {
+      console.log(data);
+      const res = JSON.stringify({
+        token: data.token,
+        email: data.data[0].email,
+        firstName: data.data[0].firstName,
+        lastName: data.data[0].lastName
+      });
+      save("user_", res);
+      navigation.navigate("Home");
+    })
+    .catch((err) => {
+      console.error(err);
+    });
 };
 
 export default function signIn({ navigation }) {
@@ -71,7 +84,11 @@ export default function signIn({ navigation }) {
             <Text style={tw`text-[#60AEC2] font-bold`}>Register</Text>
           </TouchableHighlight>
         </View>
-        <TouchableHighlight onPress={() => {handleSignIn(email, password)}}>
+        <TouchableHighlight
+          onPress={() => {
+            handleSignIn(email, password, navigation);
+          }}
+        >
           <View
             style={tw`w-full py-4 bg-[#60AEC2] flex items-center justify-center rounded-xl mt-2`}
           >
