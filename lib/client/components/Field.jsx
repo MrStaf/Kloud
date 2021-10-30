@@ -8,7 +8,6 @@ export default function Field({ title, autoComplete, type, value, setValue }) {
   return (
     <View>
       <TextInput
-        onChange={(e) => console.log(e)}
         style={[tw`w-64 px-6 mb-5 h-14`,{
           backgroundColor: "#fff",
           borderRadius: 15,
