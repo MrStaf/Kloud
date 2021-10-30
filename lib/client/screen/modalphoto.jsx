@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Button, Text, Image, TouchableOpacity } from "react-native";
 // Modules
-// import ReactNativeZoomableView from "@dudigital/react-native-zoomable-view/src/ReactNativeZoomableView";
+import ReactNativeZoomableView from "@dudigital/react-native-zoomable-view/src/ReactNativeZoomableView";
 // Styles
 import tw from "twrnc";
 import { SvgXml } from "react-native-svg";
@@ -16,7 +16,7 @@ const test = require("../assets/sansTitre.png");
 
 export default function ModalPhoto({ navigation }) {
   const [fav, setFav] = useState(false);
-  const id = navigation.getState().routes[1].params.id;
+  // const id = navigation.getState().routes[1].params.id;
   return (
     <View
       style={[
@@ -53,13 +53,13 @@ export default function ModalPhoto({ navigation }) {
           },
         ]}
       >
-        {/* <ReactNativeZoomableView
+        <ReactNativeZoomableView
           maxZoom={2}
           minZoom={1}
           zoomStep={0.5}
           initialZoom={1}
           bindToBorders={true}
-        > */}
+        >
           <Image
             source={test}
             style={{
@@ -68,7 +68,7 @@ export default function ModalPhoto({ navigation }) {
               resizeMode: "contain",
             }}
           />
-        {/* </ReactNativeZoomableView> */}
+        </ReactNativeZoomableView>
       </View>
       <View
         style={[
