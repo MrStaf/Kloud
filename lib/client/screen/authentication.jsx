@@ -28,11 +28,8 @@ const Key = ({ num, setPass, pass }) => {
       }}
       onPressOut={() => {
         setBg("#fff");
-      }}
-    >
-      <View
-        style={tw`h-16 w-16 mx-2 my-2 bg-[${bg}] rounded-full border border-[#60AEC2] flex justify-center items-center`}
-      >
+      }}>
+      <View style={tw`h-16 w-16 mx-2 my-2 bg-[${bg}] rounded-full border border-[#60AEC2] flex justify-center items-center`}>
         <Text>{num}</Text>
       </View>
     </Pressable>
@@ -41,11 +38,7 @@ const Key = ({ num, setPass, pass }) => {
 
 const Dot = ({ filled }) => {
   let bg = filled ? "#60AEC2" : "#ffffff";
-  return (
-    <View
-      style={tw`mx-4 w-4 h-4 bg-[${bg}] rounded-full border border-[#60AEC2]`}
-    ></View>
-  );
+  return <View style={tw`mx-4 w-4 h-4 bg-[${bg}] rounded-full border border-[#60AEC2]`}></View>;
 };
 
 const Dots = ({ pass }) => {
@@ -74,11 +67,12 @@ const handleLogIn = (password, navigation) => {
   });
 };
 
-const handleCreatePassword = (password) => {
+const handleCreatePassword = (password, setHasPass) => {
   if (password.length < 3) {
     return;
   }
   save("pass_", password.join(""));
+  setHasPass(true);
 };
 
 export default function Authentication({ navigation }) {
@@ -86,25 +80,21 @@ export default function Authentication({ navigation }) {
   const [hasPass, setHasPass] = useState(false);
   useEffect(() => {
     const hasSavedPass = async () => {
+      const user = await SecureStore.getItemAsync("user_");
+      if (user === null) {
+        navigation.navigate("LandPage");
+      }
       const log = await SecureStore.getItemAsync("pass_");
-      console.log(log);
       setHasPass(log !== null);
     };
     hasSavedPass();
-  }, []);
+  }, [hasPass]);
   return (
-    <View
-      style={tw`flex-1 items-center justify-between px-8 py-16 bg-[#F3F0E6] dark:bg-[#252525]`}
-    >
+    <View style={tw`flex-1 items-center justify-between px-8 py-16 bg-[#F3F0E6] dark:bg-[#252525]`}>
       <StatusBar style="auto" />
       <View style={tw`mt-0`}>
-        <Image
-          source={logo}
-          style={{ width: 400, height: 65, resizeMode: "contain" }}
-        />
-        <Text style={tw`font-bold text-3xl text-[#60AEC2] mx-8 mt-4`}>
-          {hasPass ? "Authentication required" : "Create your code"}
-        </Text>
+        <Image source={logo} style={{ width: 400, height: 65, resizeMode: "contain" }} />
+        <Text style={tw`font-bold text-3xl text-[#60AEC2] mx-8 mt-4`}>{hasPass ? "Authentication required" : "Create your code"}</Text>
       </View>
       <View style={tw`justify-center`}>
         <Dots pass={pass} />
@@ -129,8 +119,7 @@ export default function Authentication({ navigation }) {
             <Pressable
               onPress={() => {
                 navigation.navigate("Register");
-              }}
-            >
+              }}>
               <Text style={tw`text-[#60AEC2] font-bold`}>Forgot ?</Text>
             </Pressable>
           </View>
@@ -140,17 +129,12 @@ export default function Authentication({ navigation }) {
             if (hasPass) {
               handleLogIn(pass, navigation);
             } else {
-              handleCreatePassword(pass);
+              handleCreatePassword(pass, setHasPass);
             }
             setPass([]);
-          }}
-        >
-          <View
-            style={tw`w-full py-4 bg-[#60AEC2] flex items-center justify-center rounded-xl mt-2 w-64`}
-          >
-            <Text style={tw`text-[#fff]`}>
-              {hasPass ? "Log In" : "Create your code"}
-            </Text>
+          }}>
+          <View style={tw`w-full py-4 bg-[#60AEC2] flex items-center justify-center rounded-xl mt-2 w-64`}>
+            <Text style={tw`text-[#fff]`}>{hasPass ? "Log In" : "Create your code"}</Text>
           </View>
         </Pressable>
       </View>
