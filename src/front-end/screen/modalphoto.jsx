@@ -17,9 +17,6 @@ import Constants from "expo-constants";
 // Icons
 import { dots, goBack, heart, heart_filled } from "../assets/icons";
 
-// Test Image
-const test = require("../assets/sansTitre.png");
-
 export default function ModalPhoto({ navigation, route }) {
   const [fav, setFav] = useState(false);
   const [menu, setMenu] = useState(false);

@@ -30,7 +30,7 @@
     "react-native-svg": "12.1.1",
     "react-native-svg-transformer": "^0.14.3",
     "react-native-web": "0.17.1",
-    "twrnc": "^2.0.0-rc.4"
+    "twrnc": "^2.0.4"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",
