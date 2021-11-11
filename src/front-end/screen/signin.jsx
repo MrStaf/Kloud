@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Text, View, Image, TouchableHighlight } from "react-native";
+import { Text, View, Image, Pressable } from "react-native";
 import tw from "twrnc";
 import { StatusBar } from "expo-status-bar";
 import * as SecureStore from "expo-secure-store";
@@ -10,11 +10,14 @@ import logo from "./../assets/logo.png";
 // Components
 import Field from "./../components/Field";
 
+// SVG
+import {mail, lock} from "./../assets/icons";
+
 async function save(key, value) {
   await SecureStore.setItemAsync(key, value);
 }
 
-const handleSignIn = async (email, password, navigation) => {
+const handleSignIn = async (email, password, navigation, setLogged) => {
   let headersList = {
     Accept: "*/*",
     "Content-Type": "application/json",
@@ -37,6 +40,7 @@ const handleSignIn = async (email, password, navigation) => {
         lastName: data.data[0].lastName,
       });
       save("user_", res);
+      setLogged(true);
       navigation.navigate("Authentication");
     })
     .catch((err) => {
@@ -44,7 +48,7 @@ const handleSignIn = async (email, password, navigation) => {
     });
 };
 
-export default function signIn({ navigation }) {
+export default function signIn({ navigation, logged, setLogged }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   return (
@@ -56,27 +60,27 @@ export default function signIn({ navigation }) {
         <Text style={tw`text-[#60AEC2] text-2xl mx-8`}>Welcome back. You’ve been missed!</Text>
       </View>
       <View>
-        <Field title="Email" value={email} setValue={setEmail} />
-        <Field title="Password" type="password" value={password} setValue={setPassword} />
+        <Field icon={mail} title="Email" autoComplete="email" value={email} setValue={setEmail} />
+        <Field icon={lock} title="Password" autoComplete="current-password" type="password" value={password} setValue={setPassword} />
       </View>
       <View>
         <View style={tw`flex-row justify-center w-64`}>
           <Text style={tw`text-[#777777]`}>Don't have an account ? </Text>
-          <TouchableHighlight
+          <Pressable
             onPress={() => {
               navigation.navigate("Register");
             }}>
             <Text style={tw`text-[#60AEC2] font-bold`}>Register</Text>
-          </TouchableHighlight>
+          </Pressable>
         </View>
-        <TouchableHighlight
+        <Pressable
           onPress={() => {
-            handleSignIn(email, password, navigation);
+            handleSignIn(email, password, navigation, setLogged);
           }}>
           <View style={tw`w-full py-4 bg-[#60AEC2] flex items-center justify-center rounded-xl mt-2`}>
             <Text style={tw`text-[#fff]`}>Sign In</Text>
           </View>
-        </TouchableHighlight>
+        </Pressable>
       </View>
     </View>
   );

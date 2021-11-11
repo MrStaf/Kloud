@@ -1,7 +1,9 @@
-import React from "react";
-import { Text, View, Image, TouchableHighlight } from "react-native";
+import React, { useState } from "react";
+import { Text, View, Image, Pressable } from "react-native";
 import tw from "twrnc";
 import { StatusBar } from "expo-status-bar";
+import * as SecureStore from "expo-secure-store";
+import Toast from "react-native-toast-message";
 
 // Images
 import logo from "./../assets/logo.png";
@@ -9,7 +11,90 @@ import logo from "./../assets/logo.png";
 // Components
 import Field from "./../components/Field";
 
-export default function Register({ navigation }) {
+// SVG
+import {lock, user, mail} from '../assets/icons';
+
+async function save(key, value) {
+  await SecureStore.setItemAsync(key, value);
+}
+
+const handleRegister = async (
+  firstName,
+  lastName,
+  email,
+  password,
+  confirmPassword,
+  navigation,
+  setLogged
+) => {
+  if (confirmPassword !== password) {
+    Toast.show({
+      type: "error",
+      text1: "Password",
+      text2: "Passwords are different ",
+    });
+    return;
+  }
+  if (firstName === "" || lastName  === "" || email === "" || password === "" || confirmPassword === "")
+  {
+    Toast.show({
+      type: "error",
+      text1: "Empty value",
+      text2: "Some fields are empty"
+    })
+  }
+
+  let headersList = {
+    Accept: "*/*",
+    "Content-Type": "application/json",
+  };
+
+  const body = {
+    firstName,
+    lastName,
+    email,
+    password,
+  };
+
+  fetch("https://kloud.benoit.fage.fr/api/user/signup", {
+    method: "POST",
+    body: JSON.stringify(body),
+    headers: headersList,
+  })
+    .then(function (response) {
+      return response.json();
+    })
+    .then((data) => {
+      if (data.status === "FAILED") {
+        Toast.show({
+          type: "error",
+          text1: "Field",
+          text2: data.message,
+        })
+      } else {
+        console.log(data);
+        const res = JSON.stringify({
+          token: data.token,
+          email: data.data[0].email,
+          firstName: data.data[0].firstName,
+          lastName: data.data[0].lastName,
+        });
+        save("user_", res);
+        setLogged(true);
+        navigation.navigate("Authentication");
+      }
+    })
+    .catch((err) => {
+      // console.error(err);
+    });
+};
+
+export default function Register({ navigation, logged, setLogged }) {
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   return (
     <View
       style={tw`flex-1 items-center justify-between px-8 py-16 bg-[#F3F0E6] dark:bg-[#252525]`}
@@ -28,26 +113,73 @@ export default function Register({ navigation }) {
         </Text>
       </View>
       <View>
-        <Field title="First Name" />
-        <Field title="Last Name" />
-        <Field title="Email" />
-        <Field title="Password" type="password"/>
-        <Field title="Confirm Password" type="password"/>
+        <Field
+          title="First Name"
+          autoComplete="given-name"
+          value={firstName}
+          setValue={setFirstName}
+          icon={user}
+        />
+        <Field
+          title="Last Name"
+          autoComplete="family-name"
+          value={lastName}
+          setValue={setLastName}
+          icon={user}
+        />
+        <Field
+          title="Email"
+          autoComplete="email"
+          value={email}
+          setValue={setEmail}
+          icon={mail}
+        />
+        <Field
+          title="Password"
+          type="password"
+          autoComplete="new-password"
+          value={password}
+          setValue={setPassword}
+          icon={lock}
+        />
+        <Field
+          title="Confirm Password"
+          type="password"
+          autoComplete="new-password"
+          value={confirmPassword}
+          setValue={setConfirmPassword}
+          icon={lock}
+        />
       </View>
       <View>
         <View style={tw`flex-row justify-center w-64`}>
           <Text style={tw`text-[#777777]`}>Have an account ? </Text>
-          <TouchableHighlight onPress={() => {
-            navigation.navigate("SignIn");
-          }}>
+          <Pressable
+            onPress={() => {
+              navigation.navigate("SignIn");
+            }}
+          >
             <Text style={tw`text-[#60AEC2] font-bold`}>Login</Text>
-          </TouchableHighlight>
+          </Pressable>
         </View>
-        <TouchableHighlight>
-          <View style={tw`w-full py-4 bg-[#60AEC2] flex items-center justify-center rounded-xl mt-2`}>
+        <Pressable
+          onPress={() => {
+            handleRegister(
+              firstName,
+              lastName,
+              email,
+              password,
+              confirmPassword,
+              setLogged
+            );
+          }}
+        >
+          <View
+            style={tw`w-full py-4 bg-[#60AEC2] flex items-center justify-center rounded-xl mt-2`}
+          >
             <Text style={tw`text-[#fff]`}>Register</Text>
           </View>
-        </TouchableHighlight>
+        </Pressable>
       </View>
     </View>
   );
