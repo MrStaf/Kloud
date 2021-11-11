@@ -1,5 +1,5 @@
 import React from "react";
-import { Text, View, Image, TouchableHighlight } from "react-native";
+import { Text, View, Image } from "react-native";
 import tw from "twrnc";
 import { StatusBar } from "expo-status-bar";
 
@@ -28,15 +28,17 @@ export default function landPage({ navigation }) {
         />
       </View>
       <View style={tw`mb-16`}>
-        <Text style={tw`font-bold text-center text-4xl pb-6 text-[#60AEC2]`}>
+        <Text
+          style={tw`font-bold text-center text-4xl pb-6 dark:text-[#fff] text-[#000]`}
+        >
           Secure your photos.
         </Text>
-        <Text style={tw`text-[#60AEC2] text-center text-lg`}>
+        <Text style={tw`dark:text-[#fff] text-[#000] text-center text-lg`}>
           Keep your photos online, and encrypted. One account and have access to
           your photos from anywhere in the world.
         </Text>
       </View>
-      <ButtonsLandPage navigation={navigation}/>
+      <ButtonsLandPage navigation={navigation} />
     </View>
   );
 }
