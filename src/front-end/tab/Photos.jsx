@@ -1,8 +1,20 @@
 // React Native
 import React, { useState, useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
-import { Text, View, Image, StyleSheet, FlatList, SafeAreaView, RefreshControl, Pressable } from "react-native";
+import {
+  Text,
+  View,
+  Image,
+  FlatList,
+  RefreshControl,
+  Pressable,
+} from "react-native";
 import * as SecureStore from "expo-secure-store";
+
+// Local
+import Title from "./../components/Title";
+import Header from "./../components/Header";
+import SafeAreaView from "./../components/SafeAreaView";
 
 // SVG
 import { SvgXml } from "react-native-svg";
@@ -32,10 +44,15 @@ export default function Photos({ navigation, route }) {
           "Content-Type": "application/json",
           "auth-token": userParsed.token,
         };
-        fetch(`https://kloud.benoit.fage.fr/api/photos/all/?start=${data.length}&limit=${data.length + 2}`, {
-          method: "GET",
-          headers: headersList,
-        })
+        fetch(
+          `https://kloud.benoit.fage.fr/api/photos/all/?start=${
+            data.length
+          }&limit=${data.length + 2}`,
+          {
+            method: "GET",
+            headers: headersList,
+          }
+        )
           .then(function (response) {
             return response.json();
           })
@@ -60,7 +77,7 @@ export default function Photos({ navigation, route }) {
       });
     setRefreshing(false);
   };
-  const onRefresh = async (start = -1) => {
+  const onRefresh = async () => {
     setRefreshing(true);
     SecureStore.getItemAsync("user_")
       .then((user) => {
@@ -70,10 +87,15 @@ export default function Photos({ navigation, route }) {
           "Content-Type": "application/json",
           "auth-token": userParsed.token,
         };
-        fetch(`https://kloud.benoit.fage.fr/api/photos/all/?start=0-&limit=${data.length + 2}`, {
-          method: "GET",
-          headers: headersList,
-        })
+        fetch(
+          `https://kloud.benoit.fage.fr/api/photos/all/?start=0-&limit=${
+            data.length + 2
+          }`,
+          {
+            method: "GET",
+            headers: headersList,
+          }
+        )
           .then(function (response) {
             return response.json();
           })
@@ -117,17 +139,17 @@ export default function Photos({ navigation, route }) {
   };
 
   return (
-    <SafeAreaView style={tw`flex-1 justify-between bg-[#F3F0E6] dark:bg-[#252525] pt-8`}>
+    <SafeAreaView>
       <StatusBar style="auto" />
       <FlatList
         ListHeaderComponent={() => {
           return (
-            <View style={tw`flex-row justify-between w-full px-8 py-4`}>
-              <Text style={tw`text-4xl text-[#666666]`}>Photos</Text>
+            <Header>
+              <Title text="Photos" />
               <Pressable onPress={onPress}>
                 <SvgXml xml={add} width={40} height={40} />
               </Pressable>
-            </View>
+            </Header>
           );
         }}
         style={tw`w-full`}
@@ -142,10 +164,16 @@ export default function Photos({ navigation, route }) {
                   id: item.id,
                 });
               }}
-              style={[tw`m-3 rounded-xl bg-[#ffffff]`, { width: vw(42), height: vw(42) }]}>
+              style={[
+                tw`m-3 rounded-xl bg-[#ffffff]`,
+                { width: vw(42), height: vw(42) },
+              ]}
+            >
               {/* TODO: Add progressive loading funct */}
               <Image
-                source={{ uri: "https://kloud.benoit.fage.fr/api/photos/id/" + item.id }}
+                source={{
+                  uri: "https://kloud.benoit.fage.fr/api/photos/id/" + item.id,
+                }}
                 style={[
                   tw`rounded-xl`,
                   {
@@ -162,9 +190,13 @@ export default function Photos({ navigation, route }) {
         extraData={selectedId}
         contentContainerStyle={[tw`items-start`, { marginLeft: vw(2) }]}
         ListHeaderComponentStyle={tw`w-full`}
-        refreshControl={<RefreshControl onRefresh={onRefresh} refreshing={refreshing} />}
+        refreshControl={
+          <RefreshControl onRefresh={onRefresh} refreshing={refreshing} />
+        }
       />
-      {data.length === 0 && <Text style={tw`text-[#777777]`}>No photos found.</Text>}
+      {data.length === 0 && (
+        <Text style={tw`text-[#777777]`}>No photos found.</Text>
+      )}
     </SafeAreaView>
   );
 }

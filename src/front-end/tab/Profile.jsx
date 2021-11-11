@@ -1,8 +1,12 @@
 import React from "react";
 import { StatusBar } from "expo-status-bar";
-import { View, SafeAreaView, Text, Image, Pressable } from "react-native";
+import { View, Text, Image, Pressable } from "react-native";
+import * as SecureStore from "expo-secure-store";
 
 // Local
+import Title from "./../components/Title";
+import Header from "./../components/Header";
+import SafeAreaView from "./../components/SafeAreaView";
 
 // Styles
 import tw from "twrnc";
@@ -13,7 +17,7 @@ import { logout } from "./../assets/icons";
 // SVG
 import { SvgXml } from "react-native-svg";
 
-export default function Favorite({ navigation, setLogged }) {
+export default function Profile({ navigation, setLogged }) {
   const handleLogOut = () => {
     setLogged(false);
     SecureStore.deleteItemAsync("user_");
@@ -21,14 +25,22 @@ export default function Favorite({ navigation, setLogged }) {
     navigation.navigate("LandPage");
   };
   return (
-    <SafeAreaView style={tw`flex-1 items-center justify-between bg-[#F3F0E6] dark:bg-[#252525] pt-8`}>
+    <SafeAreaView>
       <StatusBar style="auto" />
-      <View style={tw`flex-row justify-between w-full px-8 py-4`}>
-        <Text style={tw`text-4xl text-[#666666]`}>Profile</Text>
-        <Pressable onPress={toggleTheme}>
-          <SvgXml xml={logout} width={40} height={40} />
+      <Header>
+        <Title text="Profile" />
+        <Pressable onPress={handleLogOut}>
+          <SvgXml
+            style={{
+              width: 40,
+              height: 40,
+            }}
+            xml={logout}
+            width={40}
+            height={40}
+          />
         </Pressable>
-      </View>
+      </Header>
     </SafeAreaView>
   );
 }
