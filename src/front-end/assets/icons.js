@@ -94,4 +94,67 @@ const add = `
 </svg>
 `;
 
-export { homeLogo, favoriteLogo, profileLogo, albumsLogo, homeLogo_2, favoriteLogo_2, profileLogo_2, albumsLogo_2, logout, goBack, dots, heart, heart_filled, add };
+const eye = `
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M1 12C1 12 5 4 12 4C19 4 23 12 23 12C23 12 19 20 12 20C5 20 1 12 1 12Z" stroke="black" stroke-opacity="0.4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" stroke="black" stroke-opacity="0.4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+`;
+
+const eye_off = `
+<svg width="24" height="25" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_138_2)">
+<path d="M14.12 14.87C13.8454 15.1647 13.5141 15.4012 13.1462 15.5651C12.7782 15.7291 12.3809 15.8173 11.9781 15.8244C11.5753 15.8315 11.1752 15.7574 10.8016 15.6065C10.4281 15.4556 10.0887 15.231 9.80385 14.9462C9.51897 14.6613 9.29439 14.3219 9.14351 13.9484C8.99262 13.5748 8.91853 13.1747 8.92563 12.7719C8.93274 12.3691 9.02091 11.9718 9.18488 11.6038C9.34884 11.2359 9.58525 10.9047 9.88 10.63M17.94 18.69C16.2306 19.993 14.1491 20.7149 12 20.75C5 20.75 1 12.75 1 12.75C2.24389 10.4319 3.96914 8.40661 6.06 6.81L17.94 18.69ZM9.9 4.99C10.5883 4.82888 11.2931 4.74834 12 4.75C19 4.75 23 12.75 23 12.75C22.393 13.8856 21.6691 14.9547 20.84 15.94L9.9 4.99Z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M1 1.75L23 23.75" stroke="#777777" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<defs>
+<clipPath id="clip0_138_2">
+<rect width="24" height="24" fill="white" transform="translate(0 0.75)"/>
+</clipPath>
+</defs>
+</svg>
+`;
+
+const lock = `
+<svg width="24" height="25" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M19 11.75H5C3.89543 11.75 3 12.6454 3 13.75V20.75C3 21.8546 3.89543 22.75 5 22.75H19C20.1046 22.75 21 21.8546 21 20.75V13.75C21 12.6454 20.1046 11.75 19 11.75Z" stroke="black" stroke-opacity="0.4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M7 11.75V7.75C7 6.42392 7.52678 5.15215 8.46447 4.21447C9.40215 3.27678 10.6739 2.75 12 2.75C13.3261 2.75 14.5979 3.27678 15.5355 4.21447C16.4732 5.15215 17 6.42392 17 7.75V11.75" stroke="black" stroke-opacity="0.4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+`
+
+const user = `
+<svg width="24" height="25" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M20 21.75V19.75C20 18.6891 19.5786 17.6717 18.8284 16.9216C18.0783 16.1714 17.0609 15.75 16 15.75H8C6.93913 15.75 5.92172 16.1714 5.17157 16.9216C4.42143 17.6717 4 18.6891 4 19.75V21.75" stroke="black" stroke-opacity="0.4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M12 11.75C14.2091 11.75 16 9.95914 16 7.75C16 5.54086 14.2091 3.75 12 3.75C9.79086 3.75 8 5.54086 8 7.75C8 9.95914 9.79086 11.75 12 11.75Z" stroke="black" stroke-opacity="0.4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+`
+
+const mail = `
+<svg width="24" height="25" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M4 4.75H20C21.1 4.75 22 5.65 22 6.75V18.75C22 19.85 21.1 20.75 20 20.75H4C2.9 20.75 2 19.85 2 18.75V6.75C2 5.65 2.9 4.75 4 4.75Z" stroke="black" stroke-opacity="0.4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M22 6.75L12 13.75L2 6.75" stroke="black" stroke-opacity="0.4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+`
+
+
+export {
+  homeLogo,
+  favoriteLogo,
+  profileLogo,
+  albumsLogo,
+  homeLogo_2,
+  favoriteLogo_2,
+  profileLogo_2,
+  albumsLogo_2,
+  logout,
+  goBack,
+  dots,
+  heart,
+  heart_filled,
+  add,
+  eye,
+  eye_off,
+  lock,
+  user,
+  mail,
+};
