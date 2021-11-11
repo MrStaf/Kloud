@@ -64,7 +64,9 @@ const handleLogIn = (password, navigation) => {
     if (password.join("") === data.split('"').join("")) {
       navigation.navigate("Home");
     }
-  });
+  }).catch(err => {
+    SecureStore.deleteItemAsync("pass_");
+  })
 };
 
 const handleCreatePassword = (password, setHasPass) => {
