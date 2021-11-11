@@ -4,9 +4,11 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import * as SecureStore from "expo-secure-store";
+import Toast from "react-native-toast-message";
 
 // Style
 import tw from "twrnc";
+import { useDeviceContext } from 'twrnc'
 import { SvgXml } from "react-native-svg";
 
 // Screen
@@ -26,8 +28,18 @@ import Profile from "./tab/Profile";
 import Albums from "./tab/Albums";
 
 // Icons
-import { homeLogo, favoriteLogo, profileLogo, albumsLogo } from "./assets/icons";
-import { homeLogo_2, favoriteLogo_2, profileLogo_2, albumsLogo_2 } from "./assets/icons";
+import {
+  homeLogo,
+  favoriteLogo,
+  profileLogo,
+  albumsLogo,
+} from "./assets/icons";
+import {
+  homeLogo_2,
+  favoriteLogo_2,
+  profileLogo_2,
+  albumsLogo_2,
+} from "./assets/icons";
 
 const Stack = createNativeStackNavigator();
 
@@ -36,15 +48,23 @@ const Home = ({ navigation, logged, setLogged }) => {
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-      }}>
+      }}
+    >
       <Tab.Screen
         name="Photos"
         options={{
           tabBarShowLabel: false,
           tabBarIcon: ({ size, focused }) => {
-            return <SvgXml width={size} height={size} xml={focused ? homeLogo : homeLogo_2} />;
+            return (
+              <SvgXml
+                width={size}
+                height={size}
+                xml={focused ? homeLogo : homeLogo_2}
+              />
+            );
           },
-        }}>
+        }}
+      >
         {(props) => <Photos {...props} logged={logged} setLogged={setLogged} />}
       </Tab.Screen>
       <Tab.Screen
@@ -53,27 +73,48 @@ const Home = ({ navigation, logged, setLogged }) => {
         options={{
           tabBarShowLabel: false,
           tabBarIcon: ({ size, focused }) => {
-            return <SvgXml width={size} height={size} xml={focused ? favoriteLogo : favoriteLogo_2} />;
+            return (
+              <SvgXml
+                width={size}
+                height={size}
+                xml={focused ? favoriteLogo : favoriteLogo_2}
+              />
+            );
           },
         }}
       />
       <Tab.Screen
         name="Profile"
-        component={Profile}
         options={{
           tabBarShowLabel: false,
           tabBarIcon: ({ size, focused }) => {
-            return <SvgXml width={size} height={size} xml={focused ? profileLogo : profileLogo_2} />;
+            return (
+              <SvgXml
+                width={size}
+                height={size}
+                xml={focused ? profileLogo : profileLogo_2}
+              />
+            );
           },
         }}
-      />
+      >
+        {(props) => (
+          <Profile {...props} logged={logged} setLogged={setLogged} />
+        )}
+      </Tab.Screen>
       <Tab.Screen
         name="Albums"
         component={Albums}
         options={{
           tabBarShowLabel: false,
           tabBarIcon: ({ size, focused }) => {
-            return <SvgXml width={size} height={size} xml={focused ? albumsLogo : albumsLogo_2} />;
+            return (
+              <SvgXml
+                width={size}
+                height={size}
+                xml={focused ? albumsLogo : albumsLogo_2}
+              />
+            );
           },
         }}
       />
@@ -82,6 +123,7 @@ const Home = ({ navigation, logged, setLogged }) => {
 };
 
 export default function App() {
+  useDeviceContext(tw);
   const [logged, setLogged] = useState(false);
   useEffect(() => {
     const isLogged = async () => {
@@ -91,19 +133,37 @@ export default function App() {
     isLogged();
   }, [logged]);
   return (
-    <NavigationContainer>
-      <Stack.Navigator
-        screenOptions={{
-          headerShown: false,
-        }}>
-        <Stack.Screen name="Authentication" component={Authentication} />
-        <Stack.Screen name="LandPage" component={LandPage} />
-        <Stack.Screen name="SignIn" component={SignIn} />
-        <Stack.Screen name="Register" component={Register} />
-        <Stack.Screen name="Home">{(props) => <Home {...props} logged={logged} setLogged={setLogged} />}</Stack.Screen>
-        <Stack.Screen name="ModalPhoto" component={ModalPhoto} />
-        <Stack.Screen name="ModalUpload" component={ModalUpload} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <>
+      <NavigationContainer>
+        <Stack.Navigator
+          screenOptions={{
+            headerShown: false,
+          }}
+        >
+          {logged && (
+            <Stack.Screen name="Authentication" component={Authentication} />
+          )}
+          <Stack.Screen name="LandPage" component={LandPage} />
+          <Stack.Screen name="SignIn">
+            {(props) => (
+              <SignIn {...props} logged={logged} setLogged={setLogged} />
+            )}
+          </Stack.Screen>
+          <Stack.Screen name="Register">
+            {(props) => (
+              <Register {...props} logged={logged} setLogged={setLogged} />
+            )}
+          </Stack.Screen>
+          <Stack.Screen name="Home">
+            {(props) => (
+              <Home {...props} logged={logged} setLogged={setLogged} />
+            )}
+          </Stack.Screen>
+          <Stack.Screen name="ModalPhoto" component={ModalPhoto} />
+          <Stack.Screen name="ModalUpload" component={ModalUpload} />
+        </Stack.Navigator>
+      </NavigationContainer>
+      <Toast />
+    </>
   );
 }
