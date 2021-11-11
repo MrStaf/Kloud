@@ -18,10 +18,10 @@ export default function ButtonsLandPage({ navigation }) {
           <View
             style={tw`bg-[#60AEC2] py-4 px-10 mr-10 rounded-xl text-[#ffffff]`}
           >
-            <Text style={tw`text-[#ffffff]`}>Register</Text>
+            <Text style={tw`text-[#000]`}>Register</Text>
           </View>
         </TouchableHighlight>
-        <Text style={tw`text-[#ffffff]`}>Sign In</Text>
+        <Text style={tw`text-[#000]`}>Sign In</Text>
       </View>
     </TouchableHighlight>
   );
