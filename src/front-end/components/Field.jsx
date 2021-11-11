@@ -1,20 +1,33 @@
 import React, { useState } from "react";
-import { Text, TextInput, View } from "react-native";
+import { TextInput, View, Pressable } from "react-native";
 import tw from "twrnc";
 
-export default function Field({ title, autoComplete, type, value, setValue }) {
+// SVG
+import { SvgXml } from "react-native-svg";
+
+// Assets
+import { eye, eye_off} from "./../assets/icons";
+
+export default function Field({ title, autoComplete, type, value, setValue, icon }) {
   const [borderSize, setBorderSize] = useState(1);
   const isPassword = type === "password";
+  const [see, setSee] = useState(isPassword);
   return (
-    <View>
-      <TextInput
-        style={[tw`w-64 px-6 mb-5 h-14`,{
+    <View
+      style={[
+        tw`flex-row items-center w-64 px-2 mb-5 h-14`,
+        {
           backgroundColor: "#fff",
-          borderRadius: 15,
+          borderRadius: 7,
           borderColor: "#60AEC2",
           borderWidth: borderSize,
-        }]}
-        secureTextEntry={isPassword}
+        },
+      ]}
+    >
+      <SvgXml style={tw`dark:text-[#fff]`} xml={icon} width={40} height={40} />
+      <TextInput
+        style={tw` flex-grow-1`}
+        secureTextEntry={see}
         onChangeText={(text) => setValue(text)}
         defaultValue={value}
         placeholder={title}
@@ -26,6 +39,15 @@ export default function Field({ title, autoComplete, type, value, setValue }) {
         }}
         autoComplete={autoComplete}
       />
+      {isPassword && (
+        <Pressable
+          onPress={() => {
+            setSee(!see);
+          }}
+        >
+          <SvgXml xml={see ? eye : eye_off} width={32} height={32} />
+        </Pressable>
+      )}
     </View>
   );
 }
