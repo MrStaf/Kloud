@@ -24,7 +24,7 @@ export default function Field({ title, autoComplete, type, value, setValue, icon
         },
       ]}
     >
-      <SvgXml style={tw`dark:text-[#fff]`} xml={icon} width={40} height={40} />
+      <SvgXml style={tw`dark:text-[#fff] mx-2`} xml={icon} width={25} height={25} />
       <TextInput
         style={tw` flex-grow-1`}
         secureTextEntry={see}
@@ -41,6 +41,7 @@ export default function Field({ title, autoComplete, type, value, setValue, icon
       />
       {isPassword && (
         <Pressable
+        style={tw`mx-2`}
           onPress={() => {
             setSee(!see);
           }}
