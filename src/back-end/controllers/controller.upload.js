@@ -9,6 +9,7 @@ const uploadFile = async (req, res) => {
     const photoId = req.file.id;
     const date = new Date(req.file.uploadDate).toString();
     const description = req.body.description;
+    const mimeType = req.file.mimetype;
     if (req.file == undefined) {
       return res.status(400).json({
         status: "FAILED",
@@ -24,6 +25,7 @@ const uploadFile = async (req, res) => {
         userId,
         fileName,
         photoId,
+        mimeType,
       });
       newPhoto
         .save()

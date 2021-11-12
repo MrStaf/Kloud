@@ -9,6 +9,7 @@ const PhotoSchema = new Schema({
   description: String,
   userId: mongoose.ObjectId,
   photoId: mongoose.ObjectId,
+  mimeType: String,
 });
 
 const Photo = mongoose.model("Photos", PhotoSchema);

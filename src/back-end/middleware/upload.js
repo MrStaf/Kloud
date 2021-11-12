@@ -6,7 +6,6 @@ const storage = new GridFsStorage({
   url: process.env.MONGODB_URI,
   options: { useNewUrlParser: true, useUnifiedTopology: true },
   file: (req, file) => {
-    console.log(file);
     const match = ["image/png", "image/jpeg", "image/jpg"];
     if (match.indexOf(file.mimetype) === -1) {
       const filename = `${uuid()}-${file.originalname}`;
