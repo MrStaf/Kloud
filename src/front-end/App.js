@@ -5,10 +5,10 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import * as SecureStore from "expo-secure-store";
 import Toast from "react-native-toast-message";
+import { useColorScheme, View } from "react-native";
 
 // Style
 import tw from "twrnc";
-import { useDeviceContext } from 'twrnc'
 import { SvgXml } from "react-native-svg";
 
 // Screen
@@ -123,7 +123,6 @@ const Home = ({ navigation, logged, setLogged }) => {
 };
 
 export default function App() {
-  useDeviceContext(tw);
   const [logged, setLogged] = useState(false);
   useEffect(() => {
     const isLogged = async () => {
@@ -132,6 +131,17 @@ export default function App() {
     };
     isLogged();
   }, [logged]);
+  useEffect(() => {
+    const isLogged = async () => {
+      const theme = await SecureStore.getItemAsync("theme_");
+      if (theme === null) {
+        tw.setColorScheme(useColorScheme());
+      } else {
+        tw.setColorScheme(theme);
+      }
+    };
+    isLogged();
+  }, []);
   return (
     <>
       <NavigationContainer>
@@ -140,9 +150,7 @@ export default function App() {
             headerShown: false,
           }}
         >
-          {logged && (
-            <Stack.Screen name="Authentication" component={Authentication} />
-          )}
+          <Stack.Screen name="Authentication" component={Authentication} />
           <Stack.Screen name="LandPage" component={LandPage} />
           <Stack.Screen name="SignIn">
             {(props) => (
