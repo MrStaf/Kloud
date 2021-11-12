@@ -6,7 +6,14 @@ import { TouchableOpacity } from "react-native-gesture-handler";
 // Modules
 import ReactNativeZoomableView from "@dudigital/react-native-zoomable-view/src/ReactNativeZoomableView";
 import * as SecureStore from "expo-secure-store";
-import Dialog, { DialogTitle, DialogContent, DialogFooter, DialogButton, SlideAnimation, ScaleAnimation } from "react-native-popup-dialog";
+import Dialog, {
+  DialogTitle,
+  DialogContent,
+  DialogFooter,
+  DialogButton,
+  SlideAnimation,
+  ScaleAnimation,
+} from "react-native-popup-dialog";
 
 // Styles
 import tw from "twrnc";
@@ -25,7 +32,8 @@ export default function ModalPhoto({ navigation, route }) {
   const [img, setImg] = useState("");
   const [imgData, setImgData] = useState({});
   const [albums, setAlbums] = useState([]);
-  const id = navigation.getState().routes[navigation.getState().index].params.id;
+  const id =
+    navigation.getState().routes[navigation.getState().index].params.id;
 
   const handleDelete = () => {
     SecureStore.getItemAsync("user_").then((user) => {
@@ -45,6 +53,71 @@ export default function ModalPhoto({ navigation, route }) {
           merge: true,
         });
       });
+    });
+  };
+  const handleFav = async () => {
+    setFav(!fav);
+    SecureStore.getItemAsync("user_").then((data) => {
+      const userParsed = JSON.parse(data);
+      let headersList = {
+        Accept: "*/*",
+        "auth-token": userParsed.token,
+        "Content-Type": "application/json",
+      };
+      fetch(
+        `https://kloud.benoit.fage.fr/api/photos/fav/${fav ? "remove" : "add"}`,
+        {
+          method: "PATCH",
+          body: `{\n    \"photoId\": \"${id}\"\n}`,
+          headers: headersList,
+        }
+      )
+        .then(function (response) {
+          return response.text();
+        })
+        .then(function (data) {
+          // console.log(data);
+        })
+        .catch(() => {
+          setFav(!fav);
+        });
+    });
+  };
+  const handleAlbums = () => {
+    SecureStore.getItemAsync("user_").then((user) => {
+      const userParsed = JSON.parse(user);
+      let headersList = {
+        Accept: "*/*",
+        "auth-token": userParsed.token,
+        "Content-Type": "application/json",
+      };
+      fetch(
+        `https://kloud.benoit.fage.fr/api/album/${
+          album.present ? "remove" : "add"
+        }`,
+        {
+          method: "PATCH",
+          body: `{\n    \"albumId\": \"${album._id}\",\n    \"photoId\": \"${id}\"\n}`,
+          headers: headersList,
+        }
+      )
+        .then((response) => {
+          return response.json();
+        })
+        .then((res) => {
+          const newAlbums = albums;
+          newAlbums.map((alb) => {
+            if (alb._id === album._id) {
+              alb.present = !alb.present;
+            }
+            console.log(alb);
+            return alb;
+          });
+          setRefresh(true);
+        })
+        .catch((err) => {
+          console.error(err);
+        });
     });
   };
   useEffect(() => {
@@ -106,30 +179,44 @@ export default function ModalPhoto({ navigation, route }) {
         {
           paddingTop: Constants.statusBarHeight,
         },
-      ]}>
+      ]}
+    >
       <View style={tw`z-10 flex-row items-center justify-between m-4`}>
         <TouchableOpacity
           onPress={() => {
             setImg("");
             navigation.goBack();
-          }}>
+          }}
+        >
           <SvgXml width={40} height={40} xml={goBack} />
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => {
             setMenu(!menu);
-          }}>
+          }}
+        >
           <SvgXml width={40} height={30} xml={dots} />
         </TouchableOpacity>
-        <View style={[tw`absolute right-0 top-[11] bg-[#ffffff] dark:bg-[#000000] rounded-lg px-3 py-2`, { display: menu ? "flex" : "none" }]}>
+        <View
+          style={[
+            tw`absolute right-0 top-[11] bg-[#ffffff] dark:bg-[#000000] rounded-lg ${
+              menu ? "px-3 py-2" : ""
+            }`,
+            { display: menu ? "flex" : "none" },
+          ]}
+        >
           <TouchableOpacity onPress={handleDelete} style={tw`z-20`}>
             <View style={[tw`py-1`, { display: menu ? "flex" : "none" }]}>
-              <Text style={tw`text-[#000000] text-lg dark:text-[#ffffff]`}>Delete Photo</Text>
+              <Text style={tw`text-[#000000] text-lg dark:text-[#ffffff]`}>
+                Delete Photo
+              </Text>
             </View>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => setScaleAnimationDialog(true)}>
             <View style={[tw`py-1`, { display: menu ? "flex" : "none" }]}>
-              <Text style={tw`text-[#000000] text-lg dark:text-[#ffffff]`}>Add to album</Text>
+              <Text style={tw`text-[#000000] text-lg dark:text-[#ffffff]`}>
+                Add to album
+              </Text>
             </View>
           </TouchableOpacity>
         </View>
@@ -145,7 +232,9 @@ export default function ModalPhoto({ navigation, route }) {
             console.log("onHardwareBackPress");
             return true;
           }}
-          dialogTitle={<DialogTitle title="Select Albums" hasTitleBar={false} />}
+          dialogTitle={
+            <DialogTitle title="Select Albums" hasTitleBar={false} />
+          }
           actions={[
             <DialogButton
               text="DISMISS"
@@ -154,48 +243,20 @@ export default function ModalPhoto({ navigation, route }) {
               }}
               key="button-1"
             />,
-          ]}>
+          ]}
+        >
           <DialogContent>
             <View>
               {scaleAnimationDialog &&
                 albums.map((album) => {
                   return (
-                    <TouchableOpacity
-                      key={album._id}
-                      onPress={() => {
-                        SecureStore.getItemAsync("user_").then((user) => {
-                          const userParsed = JSON.parse(user);
-                          let headersList = {
-                            Accept: "*/*",
-                            "auth-token": userParsed.token,
-                            "Content-Type": "application/json",
-                          };
-                          fetch(`https://kloud.benoit.fage.fr/api/album/${album.present ? "remove" : "add"}`, {
-                            method: "PATCH",
-                            body: `{\n    \"albumId\": \"${album._id}\",\n    \"photoId\": \"${id}\"\n}`,
-                            headers: headersList,
-                          })
-                            .then((response) => {
-                              return response.json();
-                            })
-                            .then((res) => {
-                              const newAlbums = albums;
-                              newAlbums.map((alb) => {
-                                if (alb._id === album._id) {
-                                  alb.present = !alb.present;
-                                }
-                                console.log(alb);
-                                return alb;
-                              });
-                              setRefresh(true);
-                            })
-                            .catch((err) => {
-                              console.error(err);
-                            });
-                        });
-                      }}>
+                    <TouchableOpacity key={album._id} onPress={handleAlbums}>
                       <View style={tw`flex-row items-center mb-1`}>
-                        <View style={tw`h-4 w-4 rounded-sm mr-2 border-[#7777] ${album.present ? "border bg-[#60AEC2]" : "bg-[#7777]"}`}></View>
+                        <View
+                          style={tw`h-4 w-4 rounded-sm mr-2 border-[#7777] ${
+                            album.present ? "border bg-[#60AEC2]" : "bg-[#7777]"
+                          }`}
+                        ></View>
                         <Text style={tw`text-lg`}>{album?.name}</Text>
                       </View>
                     </TouchableOpacity>
@@ -220,7 +281,8 @@ export default function ModalPhoto({ navigation, route }) {
             marginBottom: Constants.statusBarHeight,
             maxHeight: vh(100) - Constants.statusBarHeight * 2,
           },
-        ]}>
+        ]}
+      >
         <ReactNativeZoomableView
           maxZoom={2}
           minZoom={1}
@@ -230,7 +292,8 @@ export default function ModalPhoto({ navigation, route }) {
           longPressDuration={50}
           onLongPress={() => {
             alert("description");
-          }}>
+          }}
+        >
           <Image
             source={{ uri: "https://kloud.benoit.fage.fr/api/photos/id/" + id }}
             style={{
@@ -248,34 +311,14 @@ export default function ModalPhoto({ navigation, route }) {
             padding: Constants.statusBarHeight,
             backgroundColor: "rgba(0, 0, 0, 0.4)",
           },
-        ]}>
-        <TouchableOpacity
-          onPress={async () => {
-            setFav(!fav);
-            SecureStore.getItemAsync("user_").then((data) => {
-              const userParsed = JSON.parse(data);
-              let headersList = {
-                Accept: "*/*",
-                "auth-token": userParsed.token,
-                "Content-Type": "application/json",
-              };
-              fetch(`https://kloud.benoit.fage.fr/api/photos/fav/${fav ? "remove" : "add"}`, {
-                method: "PATCH",
-                body: `{\n    \"photoId\": \"${id}\"\n}`,
-                headers: headersList,
-              })
-                .then(function (response) {
-                  return response.text();
-                })
-                .then(function (data) {
-                  // console.log(data);
-                })
-                .catch(() => {
-                  setFav(!fav);
-                });
-            });
-          }}>
-          <SvgXml width={40} height={30} xml={imgData.favorite ? heart_filled : heart} />
+        ]}
+      >
+        <TouchableOpacity onPress={handleFav}>
+          <SvgXml
+            width={40}
+            height={30}
+            xml={imgData.favorite ? heart_filled : heart}
+          />
         </TouchableOpacity>
       </View>
     </View>
