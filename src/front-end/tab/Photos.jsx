@@ -24,7 +24,7 @@ import tw from "twrnc";
 import { vw } from "react-native-expo-viewport-units";
 
 // Assets
-import { add } from "./../assets/icons";
+import { add, add_white } from "./../assets/icons";
 
 function onlyUnique(value, index, self) {
   return self.indexOf(value) === index;
@@ -147,7 +147,8 @@ export default function Photos({ navigation, route }) {
             <Header>
               <Title text="Photos" />
               <Pressable onPress={onPress}>
-                <SvgXml xml={add} width={40} height={40} />
+                <SvgXml style={tw`hidden dark:flex`} xml={add_white} width={40} height={40} />
+                <SvgXml style={tw`flex dark:hidden`} xml={add} width={40} height={40} />
               </Pressable>
             </Header>
           );

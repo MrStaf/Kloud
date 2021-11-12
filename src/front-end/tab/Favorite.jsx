@@ -129,7 +129,7 @@ export default function Favorite({ navigation, route }) {
   }, [route.params]);
 
   return (
-    <SafeAreaView>
+    <SafeAreaView>  
       <StatusBar style="auto" />
       <FlatList
         ListHeaderComponent={() => {
