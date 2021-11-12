@@ -91,6 +91,7 @@ export default function Authentication({ navigation }) {
     };
     hasSavedPass();
   }, [hasPass]);
+
   return (
     <View style={tw`flex-1 items-center justify-between px-8 py-16 bg-[#F3F0E6] dark:bg-[#252525]`}>
       <StatusBar style="auto" />
