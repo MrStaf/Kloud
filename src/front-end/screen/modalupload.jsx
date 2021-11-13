@@ -1,6 +1,6 @@
 // React Native
 import React, { useState, useEffect } from "react";
-import { View, Button, Text, Image, TouchableOpacity } from "react-native";
+import { View, Button, Text, Image, Pressable } from "react-native";
 
 // Modules
 import * as ImagePicker from "expo-image-picker";
@@ -18,8 +18,13 @@ import { dots, goBack } from "../assets/icons";
 const createFormData = (photo, body = {}) => {
   const data = new FormData();
   data.append("file", {
-    name: photo.fileName || photo.uri.split("/")[photo.uri.split("/").length - 1].split(".")[0],
-    type: photo.type + "/" + photo.uri.split("/")[photo.uri.split("/").length - 1].split(".")[1],
+    name:
+      photo.fileName ||
+      photo.uri.split("/")[photo.uri.split("/").length - 1].split(".")[0],
+    type:
+      photo.type +
+      "/" +
+      photo.uri.split("/")[photo.uri.split("/").length - 1].split(".")[1],
     uri: Platform.OS === "ios" ? photo.uri.replace("file://", "") : photo.uri,
   });
   Object.keys(body).forEach((key) => {
@@ -35,7 +40,8 @@ export default function ModalUpload({ navigation }) {
   useEffect(() => {
     (async () => {
       if (Platform.OS !== "web") {
-        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        const { status } =
+          await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (status !== "granted") {
           alert("Sorry, we need camera roll permissions to make this work!");
         }
@@ -90,36 +96,44 @@ export default function ModalUpload({ navigation }) {
         {
           paddingTop: Constants.statusBarHeight,
         },
-      ]}>
+      ]}
+    >
       <View style={tw`z-10 flex-row items-center justify-between m-4`}>
-        <TouchableOpacity
+        <Pressable
           onPress={() => {
             navigation.goBack();
-          }}>
+          }}
+        >
           <SvgXml width={40} height={40} xml={goBack} />
-        </TouchableOpacity>
-        <TouchableOpacity
+        </Pressable>
+        <Pressable
           onPress={() => {
             navigation.goBack();
-          }}>
+          }}
+        >
           <SvgXml width={40} height={30} xml={dots} />
-        </TouchableOpacity>
+        </Pressable>
       </View>
-      <Button title="Choose Photo" onPress={handleChoosePhoto} />
-      {photo && (
-        <>
-          <Image source={{ uri: photo.uri }} style={{ width: 200, height: 200 }} />
-          <Button title="Upload Photo" onPress={handleUploadPhoto} />
-        </>
-      )}
-      <View
-        style={[
-          tw`justify-center flex-grow`,
-          {
-            marginBottom: Constants.statusBarHeight,
-            maxHeight: vh(100) - Constants.statusBarHeight * 2,
-          },
-        ]}></View>
+      <View style={tw`items-center justify-end flex-grow`}>
+        {photo && (
+          <View style={tw`items-center justify-center flex-grow`}>
+            <Image
+              source={{ uri: photo.uri }}
+              style={{ width: vw(100), height: vh(60) }}
+            />
+            <Pressable onPress={handleUploadPhoto}>
+              <View style={tw`bg-[#60AEC2] py-4 px-10 mt-10 rounded-xl`}>
+                <Text style={tw`text-[#fff]`}>Upload Photo</Text>
+              </View>
+            </Pressable>
+          </View>
+        )}
+        <Pressable onPress={handleChoosePhoto}>
+          <View style={tw`bg-[#60AEC2] py-4 px-10 mb-10 rounded-xl`}>
+            <Text style={tw`text-[#fff]`}>Choose Photo</Text>
+          </View>
+        </Pressable>
+      </View>
     </View>
   );
 }
