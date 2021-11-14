@@ -1,15 +1,11 @@
 // React Native
 import React, { useState, useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
-import {
-  Text,
-  View,
-  Image,
-  FlatList,
-  RefreshControl,
-  Pressable,
-} from "react-native";
-import * as SecureStore from "expo-secure-store";
+import { Text, Image, FlatList, RefreshControl, Pressable } from "react-native";
+import Toast from "react-native-toast-message";
+
+// Functions
+import fetchApi from "./../functions/fetchApi";
 
 // Local
 import Title from "./../components/Title";
@@ -32,102 +28,43 @@ function onlyUnique(value, index, self) {
 
 export default function Photos({ navigation, route }) {
   const [data, setData] = useState([]);
-  const [selectedId, setSelectedId] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
-  const onEndReached = () => {
+  const onEndReached = async () => {
     setRefreshing(true);
-    SecureStore.getItemAsync("user_")
-      .then((user) => {
-        let userParsed = JSON.parse(user);
-        let headersList = {
-          Accept: "*/*",
-          "Content-Type": "application/json",
-          "auth-token": userParsed.token,
-        };
-        fetch(
-          `https://kloud.benoit.fage.fr/api/photos/all/?start=${
-            data.length
-          }&limit=${data.length + 2}`,
-          {
-            method: "GET",
-            headers: headersList,
-          }
-        )
-          .then(function (response) {
-            return response.json();
-          })
-          .then((fetched_data) => {
-            // TODO: Alert when fetched_data.data.length = 0;
-            console.log("fetched_onEndReached", fetched_data.data);
-            const fetched_data_ = fetched_data.data.map((id) => {
-              return {
-                id: id,
-                uri: "https://kloud.benoit.fage.fr/api/photos/id/" + id,
-              };
-            });
-            const newData = [...data, ...fetched_data_].filter(onlyUnique);
-            setData(newData);
-          })
-          .catch((err) => {
-            console.error(err);
-          });
-      })
-      .catch((err) => {
-        console.error(err);
-      });
-    setRefreshing(false);
-  };
-  const onRefresh = async () => {
-    setRefreshing(true);
-    SecureStore.getItemAsync("user_")
-      .then((user) => {
-        let userParsed = JSON.parse(user);
-        let headersList = {
-          Accept: "*/*",
-          "Content-Type": "application/json",
-          "auth-token": userParsed.token,
-        };
-        fetch(
-          `https://kloud.benoit.fage.fr/api/photos/all/?start=0-&limit=${
-            data.length + 2
-          }`,
-          {
-            method: "GET",
-            headers: headersList,
-          }
-        )
-          .then(function (response) {
-            return response.json();
-          })
-          .then((fetched_data) => {
-            // TODO: Alert when fetched_data.data.length = 0;
-            console.log("fetched_onRefresh", fetched_data.data);
-            const fetched_data_ = fetched_data.data.map((id) => {
-              return {
-                id: id,
-                uri: "https://kloud.benoit.fage.fr/api/photos/id/" + id,
-              };
-            });
-            setData(fetched_data_);
-          })
-          .catch((err) => {
-            console.error(err);
-          });
-      })
-      .catch((err) => {
-        console.error(err);
-      });
+    const res = await fetchApi({
+      endPoint: `photos/all/?start=${data.length}&limit=${data.length + 2}`,
+      method: "GET",
+      verify: true,
+    });
 
+    if (res.status === "FAILED") {
+      Toast.show({
+        type: "error",
+        text1: "Unable to fetch data",
+        text2: res.message,
+      });
+      setRefreshing(false);
+      return;
+    }
+    console.log("fetched_onEndReached", res.data);
+    const fetched_data = res.data.map((id) => {
+      return {
+        id: id,
+        uri: "https://kloud.benoit.fage.fr/api/photos/id/" + id,
+      };
+    });
+    const newData = [...data, ...fetched_data].filter(onlyUnique);
+    setData(newData);
     setRefreshing(false);
   };
   useEffect(() => {
-    onRefresh();
+    onEndReached();
   }, []);
 
   useEffect(() => {
     if (route.params?.refresh) {
       setData([]);
-      onRefresh(0);
+      onEndReached();
       navigation.setParams({
         refresh: false,
       });
@@ -147,8 +84,18 @@ export default function Photos({ navigation, route }) {
             <Header>
               <Title text="Photos" />
               <Pressable onPress={onPress}>
-                <SvgXml style={tw`hidden dark:flex`} xml={add_white} width={40} height={40} />
-                <SvgXml style={tw`flex dark:hidden`} xml={add} width={40} height={40} />
+                <SvgXml
+                  style={tw`hidden dark:flex`}
+                  xml={add_white}
+                  width={40}
+                  height={40}
+                />
+                <SvgXml
+                  style={tw`flex dark:hidden`}
+                  xml={add}
+                  width={40}
+                  height={40}
+                />
               </Pressable>
             </Header>
           );
@@ -188,15 +135,16 @@ export default function Photos({ navigation, route }) {
           );
         }}
         keyExtractor={(item) => item.id}
-        extraData={selectedId}
         contentContainerStyle={[tw`items-start`, { marginLeft: vw(2) }]}
         ListHeaderComponentStyle={tw`w-full`}
         refreshControl={
-          <RefreshControl onRefresh={onRefresh} refreshing={refreshing} />
+          <RefreshControl onRefresh={onEndReached} refreshing={refreshing} />
         }
       />
       {data.length === 0 && (
-        <Text style={tw`text-[#777777]`}>No photos found.</Text>
+        <Text style={tw`text-[#777777] w-full text-center`}>
+          No photos found.
+        </Text>
       )}
     </SafeAreaView>
   );

@@ -1,7 +1,18 @@
 // React Native
 import React, { useEffect, useState } from "react";
-import { View, Button, Text, Image, Pressable } from "react-native";
-import { TouchableOpacity } from "react-native-gesture-handler";
+import {
+  View,
+  Button,
+  Text,
+  Image,
+  Pressable,
+  PermissionsAndroid,
+  Platform,
+  TouchableHighlight,
+} from "react-native";
+import * as FileSystem from "expo-file-system";
+import * as Permissions from "expo-permissions";
+import * as MediaLibrary from "expo-media-library";
 
 // Modules
 import ReactNativeZoomableView from "@dudigital/react-native-zoomable-view/src/ReactNativeZoomableView";
@@ -36,6 +47,7 @@ export default function ModalPhoto({ navigation, route }) {
     navigation.getState().routes[navigation.getState().index].params.id;
 
   const handleDelete = () => {
+    setMenu(false);
     SecureStore.getItemAsync("user_").then((user) => {
       const userParsed = JSON.parse(user);
       let headersList = {
@@ -56,7 +68,6 @@ export default function ModalPhoto({ navigation, route }) {
     });
   };
   const handleFav = async () => {
-    setFav(!fav);
     SecureStore.getItemAsync("user_").then((data) => {
       const userParsed = JSON.parse(data);
       let headersList = {
@@ -73,17 +84,16 @@ export default function ModalPhoto({ navigation, route }) {
         }
       )
         .then(function (response) {
-          return response.text();
+          return response.json();
         })
         .then(function (data) {
-          // console.log(data);
+          if (data.status === "SUCCESS") {
+            setFav(!fav)
+          }
         })
-        .catch(() => {
-          setFav(!fav);
-        });
     });
   };
-  const handleAlbums = () => {
+  const handleAlbums = (album) => {
     SecureStore.getItemAsync("user_").then((user) => {
       const userParsed = JSON.parse(user);
       let headersList = {
@@ -119,6 +129,74 @@ export default function ModalPhoto({ navigation, route }) {
           console.error(err);
         });
     });
+  };
+  async function downloadPhoto(id) {
+    const user = await SecureStore.getItemAsync("user_");
+    if (!user) {
+      // Error no user
+      return;
+    }
+    const userParsed = JSON.parse(user);
+    const headersList = {
+      Accept: "*/*",
+      "auth-token": userParsed.token,
+    };
+    const response = await fetch(
+      "https://kloud.benoit.fage.fr/api/photos/meta/" + id,
+      {
+        method: "GET",
+        headers: headersList,
+      }
+    );
+    if (!response.ok) {
+      throw new Error(`Error HTTP ! status : ${response.status}`);
+    }
+
+    const { data: data } = await response.json();
+    const { mimeType, fileName } = data;
+    const file = fileName + "." + mimeType.split("/")[1];
+    console.log(file);
+
+    // Downloading the file
+    let fileLocation = FileSystem.documentDirectory + file;
+    FileSystem.downloadAsync(
+      "https://kloud.benoit.fage.fr/api/photos/id/" + id,
+      fileLocation
+    )
+      .then((url) => {
+        // Saving the file in a folder name `MyImages`
+        MediaLibrary.createAssetAsync(fileLocation).then((asset) => {
+          MediaLibrary.createAlbumAsync("Kloud", asset, false);
+        });
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }
+  const handleDownload = async (id) => {
+    setMenu(false);
+    if (Platform.os === "ios") {
+      downloadPhoto(id);
+    } else {
+      try {
+        const granted = await PermissionsAndroid.requestMultiple([
+          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+          PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+        ]);
+        const readGranted = await PermissionsAndroid.check(
+          PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE
+        );
+        const writeGranted = await PermissionsAndroid.check(
+          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE
+        );
+        if (!readGranted || !writeGranted) {
+          console.error("Error perms");
+        } else {
+          console.log("Storage perms granted");
+          downloadPhoto(id);
+        }
+      } catch (err) {}
+    }
   };
   useEffect(() => {
     if (refresh) {
@@ -181,44 +259,53 @@ export default function ModalPhoto({ navigation, route }) {
         },
       ]}
     >
-      <View style={tw`z-10 flex-row items-center justify-between m-4`}>
-        <TouchableOpacity
+      <View style={tw`flex-row items-center justify-between m-4`}>
+        <Pressable
           onPress={() => {
             setImg("");
             navigation.goBack();
           }}
         >
           <SvgXml width={40} height={40} xml={goBack} />
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => {
-            setMenu(!menu);
-          }}
-        >
+        </Pressable>
+        <Pressable onPress={() => setMenu(!menu)}>
           <SvgXml width={40} height={30} xml={dots} />
-        </TouchableOpacity>
+        </Pressable>
         <View
           style={[
-            tw`absolute right-0 top-[11] bg-[#ffffff] dark:bg-[#000000] rounded-lg ${
+            tw`z-20 absolute right-0 top-[11] bg-[#ffffff] dark:bg-[#000000] rounded-lg ${
               menu ? "px-3 py-2" : ""
             }`,
             { display: menu ? "flex" : "none" },
           ]}
         >
-          <TouchableOpacity onPress={handleDelete} style={tw`z-20`}>
+          <TouchableHighlight onPress={handleDelete} style={tw`z-20`}>
             <View style={[tw`py-1`, { display: menu ? "flex" : "none" }]}>
               <Text style={tw`text-[#000000] text-lg dark:text-[#ffffff]`}>
-                Delete Photo
+                Delete photo
               </Text>
             </View>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => setScaleAnimationDialog(true)}>
+          </TouchableHighlight>
+          <TouchableHighlight
+            style={tw`z-20`}
+            onPress={() => setScaleAnimationDialog(true)}
+          >
             <View style={[tw`py-1`, { display: menu ? "flex" : "none" }]}>
               <Text style={tw`text-[#000000] text-lg dark:text-[#ffffff]`}>
                 Add to album
               </Text>
             </View>
-          </TouchableOpacity>
+          </TouchableHighlight>
+          <TouchableHighlight
+            style={tw`z-20`}
+            onPress={() => handleDownload(id)}
+          >
+            <View style={[tw`py-1`, { display: menu ? "flex" : "none" }]}>
+              <Text style={tw`text-[#000000] text-lg dark:text-[#ffffff]`}>
+                Download photo
+              </Text>
+            </View>
+          </TouchableHighlight>
         </View>
         <Dialog
           onTouchOutside={() => {
@@ -250,7 +337,10 @@ export default function ModalPhoto({ navigation, route }) {
               {scaleAnimationDialog &&
                 albums.map((album) => {
                   return (
-                    <TouchableOpacity key={album._id} onPress={handleAlbums}>
+                    <Pressable
+                      key={album._id}
+                      onPress={() => handleAlbums(album)}
+                    >
                       <View style={tw`flex-row items-center mb-1`}>
                         <View
                           style={tw`h-4 w-4 rounded-sm mr-2 border-[#7777] ${
@@ -259,7 +349,7 @@ export default function ModalPhoto({ navigation, route }) {
                         ></View>
                         <Text style={tw`text-lg`}>{album?.name}</Text>
                       </View>
-                    </TouchableOpacity>
+                    </Pressable>
                   );
                 })}
               <Button
@@ -276,7 +366,7 @@ export default function ModalPhoto({ navigation, route }) {
 
       <View
         style={[
-          tw`justify-center flex-grow`,
+          tw`z-0 justify-center flex-grow`,
           {
             marginBottom: Constants.statusBarHeight,
             maxHeight: vh(100) - Constants.statusBarHeight * 2,
@@ -313,13 +403,13 @@ export default function ModalPhoto({ navigation, route }) {
           },
         ]}
       >
-        <TouchableOpacity onPress={handleFav}>
+        <Pressable onPress={handleFav}>
           <SvgXml
             width={40}
             height={30}
-            xml={imgData.favorite ? heart_filled : heart}
+            xml={fav ? heart_filled : heart}
           />
-        </TouchableOpacity>
+        </Pressable>
       </View>
     </View>
   );

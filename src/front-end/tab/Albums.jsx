@@ -1,162 +1,151 @@
-// Example of Popup Dialog in React Native
-// https://aboutreact.com/popup-dialog/
+// React Native
+import React, { useState, useEffect } from "react";
+import { StatusBar } from "expo-status-bar";
+import { Text, Image, FlatList, RefreshControl, Pressable } from "react-native";
+import Toast from "react-native-toast-message";
 
-// import React in our code
-import React, { useState } from "react";
+// Functions
+import fetchApi from "./../functions/fetchApi";
 
-// import all the components we are going to use
-import { SafeAreaView, View, Text, TouchableHighlight, StyleSheet, Button } from "react-native";
+// Local
+import Title from "./../components/Title";
+import Header from "./../components/Header";
+import SafeAreaView from "./../components/SafeAreaView";
 
-import Dialog, { DialogTitle, DialogContent, DialogFooter, DialogButton, SlideAnimation, ScaleAnimation } from "react-native-popup-dialog";
+// SVG
+import { SvgXml } from "react-native-svg";
 
-const Albums = () => {
-  const [defaultAnimationDialog, setDefaultAnimationDialog] = useState(false);
-  const [scaleAnimationDialog, setScaleAnimationDialog] = useState(false);
-  const [slideAnimationDialog, setSlideAnimationDialog] = useState(false);
+// Styles
+import tw from "twrnc";
+import { vw } from "react-native-expo-viewport-units";
+
+// Assets
+import { add, add_white } from "./../assets/icons";
+
+function onlyUnique(value, index, self) {
+  return self.indexOf(value) === index;
+}
+
+export default function Photos({ navigation, route }) {
+  const [data, setData] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
+  const onEndReached = async () => {
+    setRefreshing(true);
+    const res = await fetchApi({
+      endPoint: `photos/alb/?start=${data.length}&limit=${data.length + 2}`,
+      method: "GET",
+      verify: true,
+    });
+
+    if (res.status === "FAILED") {
+      Toast.show({
+        type: "error",
+        text1: "Unable to fetch data",
+        text2: res.message,
+      });
+      setRefreshing(false);
+      return;
+    }
+    console.log("fetched_onEndReached", res);
+    const fetched_data = res.data.map((id) => {
+      return {
+        id: id,
+        uri: "https://kloud.benoit.fage.fr/api/photos/id/" + id,
+      };
+    });
+    const newData = [...data, ...fetched_data].filter(onlyUnique);
+    setData(newData);
+    setRefreshing(false);
+  };
+  useEffect(() => {
+    onEndReached();
+  }, []);
+
+  useEffect(() => {
+    if (route.params?.refresh) {
+      setData([]);
+      onEndReached();
+      navigation.setParams({
+        refresh: false,
+      });
+    }
+  }, [route.params]);
+
+  const onPress = () => {
+    navigation.navigate("ModalUpload");
+  };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.container}>
-        <Text style={styles.titleStyle}>React Native Toast – Toast Alert for Android</Text>
-        {/* For Default Animation Dialog */}
-        <TouchableHighlight style={styles.buttonStyle} onPress={() => setDefaultAnimationDialog(true)}>
-          <Text style={styles.buttonTextStyle}>Default Animation Dialog</Text>
-        </TouchableHighlight>
-
-        {/* For Scale Animation Dialog */}
-        <TouchableHighlight style={styles.buttonStyle} onPress={() => setScaleAnimationDialog(true)}>
-          <Text style={styles.buttonTextStyle}>Scale Animation Dialog</Text>
-        </TouchableHighlight>
-
-        {/* For Slide Animation Dialog */}
-        <TouchableHighlight style={styles.buttonStyle} onPress={() => setSlideAnimationDialog(true)}>
-          <Text style={styles.buttonTextStyle}>Slide Animation Dialog</Text>
-        </TouchableHighlight>
-
-        <Dialog
-          onDismiss={() => {
-            setDefaultAnimationDialog(false);
-          }}
-          width={0.9}
-          visible={defaultAnimationDialog}
-          rounded
-          actionsBordered
-          dialogTitle={
-            <DialogTitle
-              title="Default Animation Dialog Simple"
-              style={{
-                backgroundColor: "#F7F7F8",
-              }}
-              hasTitleBar={false}
-              align="left"
-            />
-          }
-          footer={
-            <DialogFooter>
-              <DialogButton
-                text="CANCEL"
-                bordered
-                onPress={() => {
-                  setDefaultAnimationDialog(false);
-                }}
-                key="button-1"
-              />
-              <DialogButton
-                text="OK"
-                bordered
-                onPress={() => {
-                  setDefaultAnimationDialog(false);
-                }}
-                key="button-2"
-              />
-            </DialogFooter>
-          }>
-          <DialogContent
-            style={{
-              backgroundColor: "#F7F7F8",
-            }}>
-            <Text>Here is an example of default animation dialog</Text>
-          </DialogContent>
-        </Dialog>
-
-        <Dialog
-          onTouchOutside={() => {
-            setScaleAnimationDialog(false);
-          }}
-          width={0.9}
-          visible={scaleAnimationDialog}
-          dialogAnimation={new ScaleAnimation()}
-          onHardwareBackPress={() => {
-            setScaleAnimationDialog(false);
-            console.log("onHardwareBackPress");
-            return true;
-          }}
-          dialogTitle={<DialogTitle title="Scale Animation Dialog Sample" hasTitleBar={false} />}
-          actions={[
-            <DialogButton
-              text="DISMISS"
+    <SafeAreaView>
+      <StatusBar style="auto" />
+      <FlatList
+        ListHeaderComponent={() => {
+          return (
+            <Header>
+              <Title text="Albums" />
+              <Pressable onPress={onPress}>
+                <SvgXml
+                  style={tw`hidden dark:flex`}
+                  xml={add_white}
+                  width={40}
+                  height={40}
+                />
+                <SvgXml
+                  style={tw`flex dark:hidden`}
+                  xml={add}
+                  width={40}
+                  height={40}
+                />
+              </Pressable>
+            </Header>
+          );
+        }}
+        style={tw`w-full`}
+        numColumns={2}
+        data={data}
+        onEndReached={onEndReached}
+        renderItem={({ item, index }) => {
+          return (
+            <Pressable
               onPress={() => {
-                setScaleAnimationDialog(false);
+                navigation.navigate("ModalPhoto", {
+                  id: item.id,
+                });
               }}
-              key="button-1"
-            />,
-          ]}>
-          <DialogContent>
-            <View>
-              <Text>Here is an example of scale animation dialog. Close using back button press</Text>
-              <Button
-                title="Close"
-                onPress={() => {
-                  setScaleAnimationDialog(false);
+              style={[
+                tw`m-3 rounded-xl bg-[#ffffff]`,
+                { width: vw(42), height: vw(42) },
+              ]}
+            >
+              {/* TODO: Add progressive loading funct */}
+              <Image
+                source={{
+                  uri: "https://kloud.benoit.fage.fr/api/photos/id/" + item.id,
                 }}
-                key="button-1"
+                style={[
+                  tw`rounded-xl`,
+                  {
+                    width: vw(42),
+                    height: vw(42),
+                    resizeMode: "cover",
+                  },
+                ]}
               />
-            </View>
-          </DialogContent>
-        </Dialog>
-
-        <Dialog
-          onDismiss={() => {
-            setSlideAnimationDialog(false);
-          }}
-          onTouchOutside={() => {
-            setSlideAnimationDialog(false);
-          }}
-          visible={slideAnimationDialog}
-          dialogTitle={<DialogTitle title="Slide Animation Dialog Sample" />}
-          dialogAnimation={new SlideAnimation({ slideFrom: "bottom" })}>
-          <DialogContent>
-            <Text>Here is an example of slide animation dialog. Please click outside to close the the dialog.</Text>
-          </DialogContent>
-        </Dialog>
-      </View>
+            </Pressable>
+          );
+        }}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={[tw`items-start`, { marginLeft: vw(2) }]}
+        ListHeaderComponentStyle={tw`w-full`}
+        refreshControl={
+          <RefreshControl onRefresh={onEndReached} refreshing={refreshing} />
+        }
+      />
+      {data.length === 0 && (
+        <Text style={tw`text-[#777777] w-full text-center`}>
+          No photos found.
+        </Text>
+      )}
     </SafeAreaView>
   );
-};
-export default Albums;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#307ecc",
-    padding: 16,
-  },
-  buttonStyle: {
-    minWidth: "100%",
-    padding: 10,
-    backgroundColor: "#f5821f",
-    margin: 15,
-  },
-  buttonTextStyle: {
-    color: "white",
-    textAlign: "center",
-  },
-  titleStyle: {
-    color: "white",
-    textAlign: "center",
-    fontSize: 20,
-    marginTop: 10,
-  },
-});
+}

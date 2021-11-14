@@ -1,6 +1,9 @@
 // React Native
 import React, { useState, useEffect } from "react";
-import { View, Button, Text, Image, Pressable } from "react-native";
+import { View, Text, Image, Pressable } from "react-native";
+
+// Local
+import Button from "./../components/Button";
 
 // Modules
 import * as ImagePicker from "expo-image-picker";
@@ -99,18 +102,10 @@ export default function ModalUpload({ navigation }) {
       ]}
     >
       <View style={tw`z-10 flex-row items-center justify-between m-4`}>
-        <Pressable
-          onPress={() => {
-            navigation.goBack();
-          }}
-        >
+        <Pressable onPress={() => navigation.goBack()}>
           <SvgXml width={40} height={40} xml={goBack} />
         </Pressable>
-        <Pressable
-          onPress={() => {
-            navigation.goBack();
-          }}
-        >
+        <Pressable onPress={() => navigation.goBack()}>
           <SvgXml width={40} height={30} xml={dots} />
         </Pressable>
       </View>
@@ -121,18 +116,10 @@ export default function ModalUpload({ navigation }) {
               source={{ uri: photo.uri }}
               style={{ width: vw(100), height: vh(60) }}
             />
-            <Pressable onPress={handleUploadPhoto}>
-              <View style={tw`bg-[#60AEC2] py-4 px-10 mt-10 rounded-xl`}>
-                <Text style={tw`text-[#fff]`}>Upload Photo</Text>
-              </View>
-            </Pressable>
+            <Button onPress={handleUploadPhoto} title="Upload photo" />
           </View>
         )}
-        <Pressable onPress={handleChoosePhoto}>
-          <View style={tw`bg-[#60AEC2] py-4 px-10 mb-10 rounded-xl`}>
-            <Text style={tw`text-[#fff]`}>Choose Photo</Text>
-          </View>
-        </Pressable>
+        <Button onPress={handleChoosePhoto} title="Choose photo" />
       </View>
     </View>
   );

@@ -73,24 +73,33 @@ const handleCreatePassword = (password, setHasPass) => {
   if (password.length < 3) {
     return;
   }
+  console.log(password)
   save("pass_", password.join(""));
   setHasPass(true);
 };
 
 export default function Authentication({ navigation }) {
   const [pass, setPass] = useState([]);
-  const [hasPass, setHasPass] = useState(false);
+  const hasPin = async () => {
+    const log = await SecureStore.getItemAsync("pass_");
+    return log !== null
+  }
+  const [hasPass, setHasPass] = useState(hasPin())
+  const hasSavedPass = async () => {
+    const user = await SecureStore.getItemAsync("user_");
+    if (user === null) {
+      navigation.navigate("LandPage");
+    }
+  };
   useEffect(() => {
-    const hasSavedPass = async () => {
-      const user = await SecureStore.getItemAsync("user_");
-      if (user === null) {
-        navigation.navigate("LandPage");
-      }
-      const log = await SecureStore.getItemAsync("pass_");
-      setHasPass(log !== null);
-    };
     hasSavedPass();
-  }, [hasPass]);
+  }, []);
+  useEffect(() => {
+    hasPin()
+    .then(bool => 
+      setHasPass(bool)
+    )
+  }, [])
 
   return (
     <View style={tw`flex-1 items-center justify-between px-8 py-16 bg-[#F3F0E6] dark:bg-[#252525]`}>
@@ -128,8 +137,9 @@ export default function Authentication({ navigation }) {
           </View>
         )}
         <Pressable
-          onPress={() => {
-            if (hasPass) {
+          onPress={async () => {
+            if (await hasPin()) {
+              setHasPass(true)
               handleLogIn(pass, navigation);
             } else {
               handleCreatePassword(pass, setHasPass);

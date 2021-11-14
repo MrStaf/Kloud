@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Text, View, Image, Pressable } from "react-native";
+import { Text, View, Image, Pressable, TouchableHighlight } from "react-native";
 import tw from "twrnc";
 import { StatusBar } from "expo-status-bar";
-import * as SecureStore from "expo-secure-store";
-
+import save from "./../functions/save";
 // Images
 import logo from "./../assets/logo.png";
 
@@ -12,10 +11,7 @@ import Field from "./../components/Field";
 
 // SVG
 import {mail, lock} from "./../assets/icons";
-
-async function save(key, value) {
-  await SecureStore.setItemAsync(key, value);
-}
+import Toast from "react-native-toast-message";
 
 const handleSignIn = async (email, password, navigation, setLogged) => {
   let headersList = {
@@ -32,16 +28,27 @@ const handleSignIn = async (email, password, navigation, setLogged) => {
       return response.json();
     })
     .then((data) => {
-      console.log(data);
-      const res = JSON.stringify({
-        token: data.token,
-        email: data.data[0].email,
-        firstName: data.data[0].firstName,
-        lastName: data.data[0].lastName,
-      });
-      save("user_", res);
-      setLogged(true);
-      navigation.navigate("Authentication");
+      if (data.status === "FAILED") {
+        Toast.show({
+          type: "error",
+          text1: data.message
+        })
+      } else {
+        console.log(data)
+        Toast.show({
+          type: "success",
+          text1: data.message
+        })
+        const res = JSON.stringify({
+          token: data.token,
+          email: data.data[0].email,
+          firstName: data.data[0].firstName,
+          lastName: data.data[0].lastName,
+        });
+        save("user_", res);
+        setLogged(true);
+        navigation.navigate("Authentication");
+      }
     })
     .catch((err) => {
       console.error(err);
