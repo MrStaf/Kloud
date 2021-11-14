@@ -69,7 +69,6 @@ const Home = ({ navigation, logged, setLogged }) => {
       </Tab.Screen>
       <Tab.Screen
         name="Favorite"
-        component={Favorite}
         options={{
           tabBarShowLabel: false,
           tabBarIcon: ({ size, focused }) => {
@@ -82,7 +81,11 @@ const Home = ({ navigation, logged, setLogged }) => {
             );
           },
         }}
-      />
+      >
+        {(props) => (
+          <Favorite {...props} logged={logged} setLogged={setLogged} />
+        )}
+      </Tab.Screen>
       <Tab.Screen
         name="Profile"
         options={{
