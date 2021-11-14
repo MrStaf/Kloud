@@ -70,16 +70,6 @@ const getOneById = async (req, res) => {
               _id: file._id,
             });
             readStream.pipe(res);
-            // const bufs = [];
-            // readStream.on("data", function (chunk) {
-            //   bufs.push(chunk);
-            // });
-            // readStream.on("end", function () {
-            //   const fbuf = Buffer.concat(bufs);
-            //   const base64 = fbuf.toString("base64");
-            //   res.status(200).send(`data:${file.contentType};base64,${base64}`);
-            // });
-            // connect.close();
           } catch (error) {
             return res.status(404).json({
               status: "FAILED",
@@ -87,12 +77,6 @@ const getOneById = async (req, res) => {
             });
           }
         });
-        // } else {
-        //   res.status(403).json({
-        //     status: "FAILED",
-        //     message: "Access denied",
-        //   });
-        // }
       })
       .catch((err) => {
         res.status(400).json({
@@ -270,7 +254,7 @@ const addFav = async (req, res) => {
               { _id: pid },
               {
                 favorite: true,
-              },
+              }
             );
             return res.json({
               status: "SUCCESS",
@@ -326,7 +310,7 @@ const removeFav = async (req, res) => {
               { _id: pid },
               {
                 favorite: false,
-              },
+              }
             );
             return res.json({
               status: "SUCCESS",
@@ -422,7 +406,7 @@ const updatePhoto = async (req, res) => {
         { _id: pid },
         {
           description: description,
-        },
+        }
       );
       return res.json({
         status: "SUCCESS",
