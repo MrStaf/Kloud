@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "nodemon server.js",
-    "test": "mocha"
+    "test": "mocha",
+    "docs": "apidoc -i ./ -o ../documentation/ -e node_modules/"
   },
   "keywords": [],
   "author": "",

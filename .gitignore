@@ -102,3 +102,7 @@ dist
 
 # TernJS port file
 .tern-port
+
+# Documentation
+src/documentation/assets/
+src/documentation/index.html
