@@ -201,18 +201,85 @@ const updateUser = async (req, res) => {
       email,
       password,
     });
-    User.findOne({ _id: uid })
-      .then(async (response) => {
-        if (response) {
-          // The user exist
-          if (response._id == uid) {
-            // correct user
-            if (password) {
-              // password handling
-              const saltRounds = 10;
-              bcrypt
-                .hash(password, saltRounds)
-                .then(async (hashedPassword) => {
+    User.find({ email }).then((data) => {
+      if (data.length > 0) {
+        console.log("data", data)
+        return res.json({
+          status: "FAILED",
+          message: "User with provided email already exist",
+        });
+      } else {
+        User.findOne({ _id: uid })
+          .then(async (response) => {
+            if (response) {
+              // The user exist
+              if (response._id == uid) {
+                // correct user
+                if (password) {
+                  // password handling
+                  const saltRounds = 10;
+                  bcrypt
+                    .hash(password, saltRounds)
+                    .then(async (hashedPassword) => {
+                      try {
+                        if (firstName) {
+                          await User.updateOne(
+                            { _id: uid },
+                            {
+                              firstName,
+                            }
+                          );
+                        }
+                        if (lastName) {
+                          await User.updateOne(
+                            { _id: uid },
+                            {
+                              lastName,
+                            }
+                          );
+                        }
+                        if (email) {
+                          await User.updateOne(
+                            { _id: uid },
+                            {
+                              email,
+                            }
+                          );
+                        }
+                        await User.updateOne(
+                          { _id: uid },
+                          {
+                            password: hashedPassword,
+                          }
+                        );
+                        User.findOne({_id: uid}).then((data) => {
+                          console.log(data)
+                          const token = jwt.sign(
+                            { _id: uid },
+                            process.env.TOKEN_SECRET
+                          );
+                          return res.json({
+                            status: "SUCCESS",
+                            message: "User successfully updated",
+                            token: token,
+                            data: data,
+                          });
+                        })
+                      } catch (error) {
+                        return res.status(400).json({
+                          status: "FAILED",
+                          message: "Err: " + error,
+                        });
+                      }
+                    })
+                    .catch((err) => {
+                      console.error(err);
+                      res.status(400).json({
+                        status: "FAILED",
+                        message: "An error occurred while hashing the password",
+                      });
+                    });
+                } else {
                   try {
                     if (firstName) {
                       await User.updateOne(
@@ -238,87 +305,47 @@ const updateUser = async (req, res) => {
                         }
                       );
                     }
-                    await User.updateOne(
-                      { _id: uid },
-                      {
-                        password: hashedPassword,
-                      }
-                    );
-
-                    return res.json({
-                      status: "SUCCESS",
-                      message: "User successfully updated",
-                    });
+                    User.findOne({_id: uid}).then((data) => {
+                      console.log(data)
+                      const token = jwt.sign(
+                        { _id: uid },
+                        process.env.TOKEN_SECRET
+                      );
+                      return res.json({
+                        status: "SUCCESS",
+                        message: "User successfully updated",
+                        token: token,
+                        data: data,
+                      });
+                    })
                   } catch (error) {
                     return res.status(400).json({
                       status: "FAILED",
                       message: "Err: " + error,
                     });
                   }
-                })
-                .catch((err) => {
-                  console.error(err);
-                  res.status(400).json({
-                    status: "FAILED",
-                    message: "An error occurred while hashing the password",
-                  });
-                });
-            } else {
-              try {
-                if (firstName) {
-                  await User.updateOne(
-                    { _id: uid },
-                    {
-                      firstName,
-                    }
-                  );
                 }
-                if (lastName) {
-                  await User.updateOne(
-                    { _id: uid },
-                    {
-                      lastName,
-                    }
-                  );
-                }
-                if (email) {
-                  await User.updateOne(
-                    { _id: uid },
-                    {
-                      email,
-                    }
-                  );
-                }
-                return res.json({
-                  status: "SUCCESS",
-                  message: "User successfully updated",
-                });
-              } catch (error) {
+              } else {
                 return res.status(400).json({
                   status: "FAILED",
-                  message: "Err: " + error,
+                  message: "Access denied",
                 });
               }
+            } else {
+              res.json({
+                status: "FAILED",
+                message: "User with the provided token does not exists",
+              });
             }
-          } else {
+          })
+          .catch((err) => {
             return res.status(400).json({
               status: "FAILED",
-              message: "Access denied",
+              message: "Error while finding user",
             });
-          }
-        } else {
-          res.json({
-            status: "FAILED",
-            message: "User with the provided token does not exists",
           });
-        }
-      })
-      .catch((err) => {
-        return res.status(400).json({
-          status: "FAILED",
-          message: "Error while finding user",
-        });
-      });
+      }
+    });
   } catch (error) {
     res.status(400).json({
       status: "FAILED",
@@ -329,6 +356,7 @@ const updateUser = async (req, res) => {
         .join("\n"),
     });
   }
+
 };
 
 const deleteUser = (req, res) => {
