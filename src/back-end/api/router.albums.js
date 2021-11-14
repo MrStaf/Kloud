@@ -19,6 +19,9 @@ const verify = require("../middleware/verifyToken");
  * @apiSuccess (200) {String} status SUCCESS
  * @apiSuccess (200) {String} message Album successfully got
  * @apiSuccess (200) {Object[]} data array of Albums id
+ * @apiSuccess (200) {String} data.userId User id
+ * @apiSuccess (200) {String} data.name Name of the album
+ * @apiSuccess (200) {Date} data.date date of creation
  * 
  * @apiSuccessExample {Object} Success-Response:
  * {
@@ -52,7 +55,27 @@ const verify = require("../middleware/verifyToken");
  *
  */
 router.get("/", verify, albumController.getAlbums);
-router.get("/", verify, albumController.getMultipleAlbums);
+router.get("/alb/", verify, albumController.getMultipleAlbums);
+/**
+ * 
+ * @api {POST} /album Create an album
+ * @apiName createAlbum
+ * @apiGroup Albums
+ * @apiVersion  1.0.0
+ * 
+ * @apiHeader {String} auth-token JWT token
+ * 
+ * @apiBody {String} name Name of the album
+ * 
+ * @apiSuccess (200) {String} status SUCCESS
+ * @apiSuccess (200) {String} message Album created successfully
+ * @apiSuccess (200) {Object} data Contain Album information
+ * @apiSuccess (200) {String} data._id 
+ * @apiSuccess (200) {String} data.name Name of the album
+ * @apiSuccess (200) {Date} data.date Date of creation
+ * 
+ * 
+ */
 router.post("/", verify, albumController.addAlbum);
 
 /**
