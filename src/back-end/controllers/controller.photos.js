@@ -130,7 +130,7 @@ const getMultipleByAlbumId = async (req, res) => {
   const start = req.query.start;
   const limit = req.query.limit;
   try {
-    Photo.find({ userId: id, albums: { $elemMatch: { albumId: album_id } } })
+    Photo.find({ userId: id, albums: { $in: [album_id] } })
       .sort({ date: -1 })
       .skip(parseInt(start))
       .limit(parseInt(limit))

@@ -13,7 +13,7 @@ router.post("/upload", verify, upload.single("file"), uploadController.uploadFil
 router.get("/id/:id", photosController.getOneById);
 router.get("/meta/:id", verify, photosController.getMetaById);
 router.get("/all", verify, photosController.getMultipleByUserId);
-router.get("/alb/:id/:start:limit", verify, photosController.getMultipleByAlbumId);
+router.get("/alb/:id", verify, photosController.getMultipleByAlbumId);
 router.get("/fav", verify, photosController.getMultipleByFav);
 router.delete("/id/:id", verify, photosController.deletePhoto);
 router.patch("/fav/add", verify, photosController.addFav);
