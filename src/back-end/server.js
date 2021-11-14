@@ -8,7 +8,7 @@ require("./config/config.db");
 var cors = require('cors');
 
 const app = require('express')();
-const port = 3000;
+const port = 3001;
 
 // Import routes
 const UserRouter = require('./api/router.user');
