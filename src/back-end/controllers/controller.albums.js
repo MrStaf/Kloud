@@ -5,6 +5,27 @@ const mongoose = require("mongoose");
 const Albums = require("../models/models.album");
 const Photo = require("../models/models.photo");
 
+const getAlbum = async (req, res) => {
+  const userId = req.user._id;
+  Albums.findOne({
+    userId: userId,
+    _id: req.params.id
+  })
+    .then((data) => {
+      res.json({
+        status: "SUCCESS",
+        message: "Album successfully got",
+        data: data,
+      });
+    })
+    .catch((err) => {
+      res.status(404).send({
+        status: "FAILED",
+        message: "Album not found",
+      });
+    });
+};
+
 const getAlbums = async (req, res) => {
   const userId = req.user._id;
   Albums.find({
@@ -271,6 +292,7 @@ const updateAlbumName = async (req, res) => {
 };
 
 module.exports = {
+  getAlbum,
   getAlbums,
   getMultipleAlbums,
   addAlbum,

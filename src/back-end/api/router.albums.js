@@ -55,6 +55,7 @@ const verify = require("../middleware/verifyToken");
  *
  */
 router.get("/", verify, albumController.getAlbums);
+router.get("/id/:id", verify, albumController.getAlbum);
 router.get("/alb/", verify, albumController.getMultipleAlbums);
 /**
  * 
