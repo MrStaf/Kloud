@@ -18,6 +18,5 @@ export default async function fetchApi({ endPoint, method, verify = false, body 
       method: method,
   })
   const res = await response.json();
-  console.log(res)
   return res;
 }
