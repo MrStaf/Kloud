@@ -12,7 +12,6 @@ const port = 3001;
 
 // Import routes
 const UserRouter = require('./api/router.user');
-const PostsRouter = require('./api/router.posts');
 const UploadRouter = require('./api/router.photos');
 const AlbumRouter = require('./api/router.albums');
 
@@ -23,7 +22,6 @@ app.use(cors());
 
 // Routes set to the app
 app.use("/api/user", UserRouter);
-app.use("/api/posts", PostsRouter);
 app.use("/api/photos", UploadRouter);
 app.use("/api/album", AlbumRouter);
 
