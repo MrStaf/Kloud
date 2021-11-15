@@ -71,7 +71,7 @@ export default function ModalUpload({ navigation }) {
         };
         fetch(`https://kloud.benoit.fage.fr/api/photos/upload`, {
           method: "POST",
-          body: createFormData(photo, { description: "test2" }),
+          body: createFormData(photo, { description: "" }),
           headers: headersList,
         })
           .then((response) => response.json())
