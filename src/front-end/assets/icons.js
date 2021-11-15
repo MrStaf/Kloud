@@ -148,7 +148,12 @@ const mail = `
 <path d="M22 6.75L12 13.75L2 6.75" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
 `
-
+const name = `
+<svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M4.72107 17.1628L10.7211 11.1628L4.72107 5.16275" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M12.7211 19.1628H20.7211" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+`
 
 export {
   homeLogo,
@@ -172,4 +177,5 @@ export {
   lock,
   user,
   mail,
+  name,
 };
