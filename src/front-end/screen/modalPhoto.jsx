@@ -11,7 +11,6 @@ import {
   TouchableHighlight,
 } from "react-native";
 import * as FileSystem from "expo-file-system";
-import * as Permissions from "expo-permissions";
 import * as MediaLibrary from "expo-media-library";
 
 // Modules
@@ -20,9 +19,7 @@ import * as SecureStore from "expo-secure-store";
 import Dialog, {
   DialogTitle,
   DialogContent,
-  DialogFooter,
   DialogButton,
-  SlideAnimation,
   ScaleAnimation,
 } from "react-native-popup-dialog";
 
@@ -40,7 +37,6 @@ export default function ModalPhoto({ navigation, route }) {
   const [menu, setMenu] = useState(false);
   const [refresh, setRefresh] = useState(true);
   const [scaleAnimationDialog, setScaleAnimationDialog] = useState(false);
-  const [img, setImg] = useState("");
   const [imgData, setImgData] = useState({});
   const [albums, setAlbums] = useState([]);
   const id =
@@ -262,7 +258,6 @@ export default function ModalPhoto({ navigation, route }) {
       <View style={tw`flex-row items-center justify-between m-4`}>
         <Pressable
           onPress={() => {
-            setImg("");
             navigation.goBack();
           }}
         >

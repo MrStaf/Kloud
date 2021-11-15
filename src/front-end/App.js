@@ -16,8 +16,10 @@ import LandPage from "./screen/landpage";
 import Register from "./screen/register";
 import SignIn from "./screen/signin";
 import Authentication from "./screen/authentication";
-import ModalPhoto from "./screen/modalphoto";
-import ModalUpload from "./screen/modalupload";
+import ModalPhoto from "./screen/modalPhoto";
+import ModalUpload from "./screen/modalUpload";
+import ModalCreateAlbum from "./screen/modalCreateAlbum";
+import ModalViewAlbum from "./screen/modalViewAlbum";
 
 // Tab
 const Tab = createBottomTabNavigator();
@@ -172,6 +174,8 @@ export default function App() {
           </Stack.Screen>
           <Stack.Screen name="ModalPhoto" component={ModalPhoto} />
           <Stack.Screen name="ModalUpload" component={ModalUpload} />
+          <Stack.Screen name="ModalCreateAlbum" component={ModalCreateAlbum} />
+          <Stack.Screen name="ModalViewAlbum" component={ModalViewAlbum} />
         </Stack.Navigator>
       </NavigationContainer>
       <Toast />

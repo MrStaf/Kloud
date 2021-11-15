@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { View, Text, Image, Pressable } from "react-native";
 
 // Local
-import Button from "./../components/Button";
+import Button from "../components/Button";
 
 // Modules
 import * as ImagePicker from "expo-image-picker";
