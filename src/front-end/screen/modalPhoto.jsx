@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from "react";
 import {
   View,
-  Button,
   Text,
   Image,
   Pressable,
@@ -30,7 +29,13 @@ import { vw, vh } from "react-native-expo-viewport-units";
 import Constants from "expo-constants";
 
 // Icons
-import { dots, goBack, heart, heart_filled } from "../assets/icons";
+import { dots, goBack, heart, heart_filled, name } from "../assets/icons";
+
+// Local
+import Field from "../components/Field";
+import Button from "../components/Button";
+import fetchApi from "../functions/fetchApi";
+import Toast from "react-native-toast-message";
 
 export default function ModalPhoto({ navigation, route }) {
   const [fav, setFav] = useState(false);
@@ -39,6 +44,9 @@ export default function ModalPhoto({ navigation, route }) {
   const [scaleAnimationDialog, setScaleAnimationDialog] = useState(false);
   const [imgData, setImgData] = useState({});
   const [albums, setAlbums] = useState([]);
+  const [details, setDetails] = useState(false);
+  const [editDescription, setEditDescription] = useState(false);
+  const [newDescription, setNewDescription] = useState("");
   const id =
     navigation.getState().routes[navigation.getState().index].params.id;
 
@@ -84,9 +92,9 @@ export default function ModalPhoto({ navigation, route }) {
         })
         .then(function (data) {
           if (data.status === "SUCCESS") {
-            setFav(!fav)
+            setFav(!fav);
           }
-        })
+        });
     });
   };
   const handleAlbums = (album) => {
@@ -161,7 +169,7 @@ export default function ModalPhoto({ navigation, route }) {
     )
       .then((url) => {
         // Saving the file in a folder name `MyImages`
-        MediaLibrary.createAssetAsync(fileLocation).then((asset) => {
+        MediaLibrary.createAssetAsync(url.uri).then((asset) => {
           MediaLibrary.createAlbumAsync("Kloud", asset, false);
         });
       })
@@ -194,6 +202,35 @@ export default function ModalPhoto({ navigation, route }) {
       } catch (err) {}
     }
   };
+  const handleDetails = () => {
+    setDetails(true);
+    setScaleAnimationDialog(true);
+    console.log(imgData);
+    setMenu(false);
+  };
+  const handleChangeDescription = async () => {
+    const res = await fetchApi({
+      endPoint: "photos/desc",
+      verify: true,
+      method: "PATCH",
+      body: {
+        photoId: id,
+        description: newDescription,
+      },
+    });
+    console.log(res);
+    if (res.status === "SUCCESS") {
+      Toast.show({
+        type: "success",
+        text1: res.message,
+      });
+    } else {
+      Toast.show({
+        type: "error",
+        text1: res.message,
+      });
+    }
+  };
   useEffect(() => {
     if (refresh) {
       SecureStore.getItemAsync("user_").then((data) => {
@@ -211,7 +248,6 @@ export default function ModalPhoto({ navigation, route }) {
             return response.json();
           })
           .then((data) => {
-            // console.log(data);
             setImgData(data.data);
             setFav(data.data.favorite);
             fetch("https://kloud.benoit.fage.fr/api/album", {
@@ -245,7 +281,6 @@ export default function ModalPhoto({ navigation, route }) {
       });
     }
   }, [route.params, refresh]);
-
   return (
     <View
       style={[
@@ -256,11 +291,7 @@ export default function ModalPhoto({ navigation, route }) {
       ]}
     >
       <View style={tw`flex-row items-center justify-between m-4`}>
-        <Pressable
-          onPress={() => {
-            navigation.goBack();
-          }}
-        >
+        <Pressable onPress={() => navigation.goBack()}>
           <SvgXml width={40} height={40} xml={goBack} />
         </Pressable>
         <Pressable onPress={() => setMenu(!menu)}>
@@ -283,7 +314,10 @@ export default function ModalPhoto({ navigation, route }) {
           </TouchableHighlight>
           <TouchableHighlight
             style={tw`z-20`}
-            onPress={() => setScaleAnimationDialog(true)}
+            onPress={() => {
+              setScaleAnimationDialog(true);
+              setMenu(false);
+            }}
           >
             <View style={[tw`py-1`, { display: menu ? "flex" : "none" }]}>
               <Text style={tw`text-[#000000] text-lg dark:text-[#ffffff]`}>
@@ -301,28 +335,35 @@ export default function ModalPhoto({ navigation, route }) {
               </Text>
             </View>
           </TouchableHighlight>
+          <TouchableHighlight style={tw`z-20`} onPress={handleDetails}>
+            <View style={[tw`py-1`, { display: menu ? "flex" : "none" }]}>
+              <Text style={tw`text-[#000000] text-lg dark:text-[#ffffff]`}>
+                Details
+              </Text>
+            </View>
+          </TouchableHighlight>
         </View>
         <Dialog
-          onTouchOutside={() => {
-            setScaleAnimationDialog(false);
-          }}
+          onTouchOutside={() => setScaleAnimationDialog(false)}
           width={0.9}
           visible={scaleAnimationDialog}
           dialogAnimation={new ScaleAnimation()}
-          onHardwareBackPress={() => {
-            setScaleAnimationDialog(false);
-            console.log("onHardwareBackPress");
-            return true;
-          }}
           dialogTitle={
-            <DialogTitle title="Select Albums" hasTitleBar={false} />
+            <DialogTitle
+              title={
+                details || editDescription
+                  ? editDescription
+                    ? "Edit description"
+                    : "Details"
+                  : "Select Albums"
+              }
+              hasTitleBar={false}
+            />
           }
           actions={[
             <DialogButton
               text="DISMISS"
-              onPress={() => {
-                setScaleAnimationDialog(false);
-              }}
+              onPress={() => setScaleAnimationDialog(false)}
               key="button-1"
             />,
           ]}
@@ -330,6 +371,8 @@ export default function ModalPhoto({ navigation, route }) {
           <DialogContent>
             <View>
               {scaleAnimationDialog &&
+                !details &&
+                !editDescription &&
                 albums.map((album) => {
                   return (
                     <Pressable
@@ -347,10 +390,53 @@ export default function ModalPhoto({ navigation, route }) {
                     </Pressable>
                   );
                 })}
+              {details && scaleAnimationDialog && (
+                <View>
+                  <Text style={tw`font-bold`}>File name</Text>
+                  <Text>{imgData.fileName}</Text>
+                  <Text style={tw`font-bold`}>Date</Text>
+                  <Text>{imgData.date}</Text>
+                  <Text style={tw`font-bold`}>Description</Text>
+                  <Text>{imgData.description}</Text>
+                  <Button
+                    style={tw`mt-2 mb-2`}
+                    title="Edit Description"
+                    onPress={() => {
+                      setEditDescription(true);
+                      setDetails(false);
+                    }}
+                  />
+                </View>
+              )}
+              {editDescription && scaleAnimationDialog && (
+                <View style={tw`w-full`}>
+                  <Field
+                    style={tw`w-full`}
+                    icon={name}
+                    title="Edit description"
+                    value={newDescription}
+                    setValue={setNewDescription}
+                  />
+                  <Button
+                    style={tw`w-full mb-2`}
+                    title="Submit"
+                    onPress={() => {
+                      handleChangeDescription();
+                      setScaleAnimationDialog(false);
+                      setNewDescription("");
+                      setEditDescription(false);
+                      setDetails(false);
+                    }}
+                  />
+                </View>
+              )}
               <Button
+                style={tw`mb-0`}
                 title="Close"
                 onPress={() => {
                   setScaleAnimationDialog(false);
+                  setEditDescription(false);
+                  setDetails(false);
                 }}
                 key="button-1"
               />
@@ -374,10 +460,6 @@ export default function ModalPhoto({ navigation, route }) {
           zoomStep={0.5}
           initialZoom={1}
           bindToBorders={true}
-          longPressDuration={50}
-          onLongPress={() => {
-            alert("description");
-          }}
         >
           <Image
             source={{ uri: "https://kloud.benoit.fage.fr/api/photos/id/" + id }}
@@ -399,11 +481,7 @@ export default function ModalPhoto({ navigation, route }) {
         ]}
       >
         <Pressable onPress={handleFav}>
-          <SvgXml
-            width={40}
-            height={30}
-            xml={fav ? heart_filled : heart}
-          />
+          <SvgXml width={40} height={30} xml={fav ? heart_filled : heart} />
         </Pressable>
       </View>
     </View>
