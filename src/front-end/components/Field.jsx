@@ -8,7 +8,7 @@ import { SvgXml } from "react-native-svg";
 // Assets
 import { eye, eye_off} from "./../assets/icons";
 
-export default function Field({ title, autoComplete, type, value, setValue, icon }) {
+export default function Field({ title, autoComplete, type, value, setValue, icon, style={} }) {
   const [borderSize, setBorderSize] = useState(1);
   const isPassword = type === "password";
   const [see, setSee] = useState(isPassword);
@@ -22,6 +22,7 @@ export default function Field({ title, autoComplete, type, value, setValue, icon
           borderColor: "#60AEC2",
           borderWidth: borderSize,
         },
+        style
       ]}
     >
       <SvgXml style={tw`dark:text-[#fff] mx-2`} xml={icon} width={25} height={25} />
