@@ -40,7 +40,6 @@ export default function Favorite({ navigation, route }) {
       setRefreshing(false);
       return;
     }
-    console.log("fetched_onEndReached", res.data);
     const fetched_data = res.data.map((id) => {
       return {
         id: id,
