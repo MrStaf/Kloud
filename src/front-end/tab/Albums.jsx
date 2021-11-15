@@ -1,7 +1,14 @@
 // React Native
 import React, { useState, useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
-import { Text, Image, FlatList, RefreshControl, Pressable } from "react-native";
+import {
+  Text,
+  View,
+  Image,
+  FlatList,
+  RefreshControl,
+  Pressable,
+} from "react-native";
 import Toast from "react-native-toast-message";
 
 // Functions
@@ -29,13 +36,19 @@ function onlyUnique(value, index, self) {
 export default function Photos({ navigation, route }) {
   const [data, setData] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
+
   const onEndReached = async () => {
     setRefreshing(true);
     const res = await fetchApi({
-      endPoint: `photos/alb/?start=${data.length}&limit=${data.length + 2}`,
+      endPoint: `album/alb/?start=${data.length}&limit=${data.length + 2}`,
       method: "GET",
       verify: true,
     });
+
+    if (res.data.length === 0) {
+      setRefreshing(false);
+      return;
+    }
 
     if (res.status === "FAILED") {
       Toast.show({
@@ -46,16 +59,24 @@ export default function Photos({ navigation, route }) {
       setRefreshing(false);
       return;
     }
-    console.log("fetched_onEndReached", res);
-    const fetched_data = res.data.map((id) => {
-      return {
-        id: id,
-        uri: "https://kloud.benoit.fage.fr/api/photos/id/" + id,
-      };
-    });
-    const newData = [...data, ...fetched_data].filter(onlyUnique);
+    const albums = await Promise.all(
+      res.data.map(async (album) => {
+        const id = await fetchApi({
+          endPoint: `photos/alb/${album._id}?start=0&limit=1`,
+          method: "GET",
+          verify: true,
+        });
+        const photoId = id?.data[0];
+        return { ...album, photoId };
+      })
+    );
+    const newData = [...data, ...albums].filter(onlyUnique);
     setData(newData);
     setRefreshing(false);
+  };
+  const onRefresh = async () => {
+    setData([]);
+    onEndReached();
   };
   useEffect(() => {
     onEndReached();
@@ -72,7 +93,7 @@ export default function Photos({ navigation, route }) {
   }, [route.params]);
 
   const onPress = () => {
-    navigation.navigate("ModalUpload");
+    navigation.navigate("ModalCreateAlbum");
   };
 
   return (
@@ -105,45 +126,55 @@ export default function Photos({ navigation, route }) {
         data={data}
         onEndReached={onEndReached}
         renderItem={({ item, index }) => {
+          console.log(item);
           return (
-            <Pressable
-              onPress={() => {
-                navigation.navigate("ModalPhoto", {
-                  id: item.id,
-                });
-              }}
-              style={[
-                tw`m-3 rounded-xl bg-[#ffffff]`,
-                { width: vw(42), height: vw(42) },
-              ]}
-            >
-              {/* TODO: Add progressive loading funct */}
-              <Image
-                source={{
-                  uri: "https://kloud.benoit.fage.fr/api/photos/id/" + item.id,
+            <View style={[tw`flex-col m-3`, { width: vw(42) }]}>
+              <Pressable
+                onPress={() => {
+                  navigation.navigate("ModalViewAlbum", {
+                    id: item._id,
+                  });
                 }}
                 style={[
-                  tw`rounded-xl`,
-                  {
-                    width: vw(42),
-                    height: vw(42),
-                    resizeMode: "cover",
-                  },
+                  tw`rounded-xl bg-[#ffffff]`,
+                  { width: vw(42), height: vw(42) },
                 ]}
-              />
-            </Pressable>
+              >
+                {/* TODO: Add progressive loading funct */}
+                <Image
+                  source={{
+                    uri:
+                      "https://kloud.benoit.fage.fr/api/photos/id/" +
+                      item.photoId,
+                  }}
+                  style={[
+                    tw`rounded-xl`,
+                    {
+                      width: vw(42),
+                      height: vw(42),
+                      resizeMode: "cover",
+                    },
+                  ]}
+                />
+              </Pressable>
+              <Text
+                style={tw`text-[#000] dark:text-[#fff] w-full text-center flex-wrap`}
+              >
+                {item.name}
+              </Text>
+            </View>
           );
         }}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item._id}
         contentContainerStyle={[tw`items-start`, { marginLeft: vw(2) }]}
         ListHeaderComponentStyle={tw`w-full`}
         refreshControl={
-          <RefreshControl onRefresh={onEndReached} refreshing={refreshing} />
+          <RefreshControl onRefresh={onRefresh} refreshing={refreshing} />
         }
       />
       {data.length === 0 && (
         <Text style={tw`text-[#777777] w-full text-center`}>
-          No photos found.
+          No albums found.
         </Text>
       )}
     </SafeAreaView>
