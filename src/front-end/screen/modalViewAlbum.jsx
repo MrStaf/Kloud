@@ -8,8 +8,15 @@ import {
   FlatList,
   RefreshControl,
   Pressable,
+  TouchableHighlight,
 } from "react-native";
 import Toast from "react-native-toast-message";
+import Dialog, {
+  DialogTitle,
+  DialogContent,
+  DialogButton,
+  ScaleAnimation,
+} from "react-native-popup-dialog";
 
 // Functions
 import fetchApi from "./../functions/fetchApi";
@@ -18,6 +25,8 @@ import fetchApi from "./../functions/fetchApi";
 import Title from "./../components/Title";
 import Header from "./../components/Header";
 import SafeAreaView from "./../components/SafeAreaView";
+import Button from "../components/Button";
+import Field from "../components/Field";
 
 // SVG
 import { SvgXml } from "react-native-svg";
@@ -27,7 +36,7 @@ import tw from "twrnc";
 import { vw } from "react-native-expo-viewport-units";
 
 // Assets
-import { dots, goBack } from "./../assets/icons";
+import { dots, goBack, name } from "./../assets/icons";
 
 function onlyUnique(value, index, self) {
   return self.indexOf(value) === index;
@@ -38,6 +47,8 @@ export default function modalViewAlbum({ navigation, route }) {
   const [refreshing, setRefreshing] = useState(false);
   const [album, setAlbum] = useState({});
   const [menu, setMenu] = useState(false);
+  const [scaleAnimationDialog, setScaleAnimationDialog] = useState(false);
+  const [albumName, setAlbumName] = useState("");
 
   const id =
     navigation.getState().routes[navigation.getState().index].params.id;
@@ -47,20 +58,47 @@ export default function modalViewAlbum({ navigation, route }) {
       endPoint: `album/id/${id}`,
       method: "DELETE",
       verify: true,
-    })
+    });
     if (response.status === "SUCCESS") {
       Toast.show({
-        type:"success",
+        type: "success",
         text1: response.message,
-      })
+      });
+      setMenu(false);
       navigation.goBack();
-      return
+      return;
     }
     Toast.show({
       type: "error",
-      text1: response.message
-    })
-  }
+      text1: response.message,
+    });
+  };
+  const handleRenameAlbum = async () => {
+    const res = await fetchApi({
+      endPoint: `album/name`,
+      method: "PATCH",
+      verify: true,
+      body: {
+        name: albumName,
+        albumId: id,
+      },
+    });
+    if (res.status === "SUCCESS") {
+      setAlbum(res.data);
+      Toast.show({
+        type: "success",
+        text1: res.message,
+      });
+      setMenu(false);
+      setAlbumName("");
+      setScaleAnimationDialog(false);
+    } else {
+      Toast.show({
+        type: "error",
+        text1: res.message,
+      });
+    }
+  };
   const onEndReached = async () => {
     setRefreshing(true);
     const res = await fetchApi({
@@ -132,24 +170,6 @@ export default function modalViewAlbum({ navigation, route }) {
               <Pressable onPress={() => setMenu(!menu)}>
                 <SvgXml xml={dots} width={40} height={30} />
               </Pressable>
-              <View
-                style={[
-                  tw`z-20 absolute right-0 top-[13] bg-[#ffffff] dark:bg-[#000000] rounded-lg ${
-                    menu ? "px-3 py-2" : ""
-                  }`,
-                  { display: menu ? "flex" : "none" },
-                ]}
-              >
-                <Pressable onPress={handleDelete} style={tw`z-20`}>
-                  <View style={[tw`py-1`, { display: menu ? "flex" : "none" }]}>
-                    <Text
-                      style={tw`text-[#000000] text-lg dark:text-[#ffffff]`}
-                    >
-                      Delete Album
-                    </Text>
-                  </View>
-                </Pressable>
-              </View>
             </Header>
           );
         }}
@@ -200,6 +220,77 @@ export default function modalViewAlbum({ navigation, route }) {
           No albums found.
         </Text>
       )}
+      <Dialog
+        onTouchOutside={() => {
+          setScaleAnimationDialog(false);
+        }}
+        width={0.9}
+        visible={scaleAnimationDialog}
+        dialogAnimation={new ScaleAnimation()}
+        onHardwareBackPress={() => {
+          setScaleAnimationDialog(false);
+          console.log("onHardwareBackPress");
+          return true;
+        }}
+        dialogTitle={<DialogTitle title="Rename Album" hasTitleBar={false} />}
+        actions={[
+          <DialogButton
+            text="DISMISS"
+            onPress={() => {
+              setScaleAnimationDialog(false);
+            }}
+            key="button-1"
+          />,
+        ]}
+      >
+        <DialogContent>
+          <View style={tw`flex-col items-center`}>
+            <Field
+              icon={name}
+              title="Name"
+              value={albumName}
+              setValue={setAlbumName}
+            />
+            <View style={tw`flex-row`}>
+              <Button title="Submit" onPress={handleRenameAlbum} />
+              <View style={tw`h-full p-2`}></View>
+              <Button
+                title="Cancel"
+                onPress={() => {
+                  setScaleAnimationDialog(false);
+                  setAlbumName("");
+                }}
+              />
+            </View>
+          </View>
+        </DialogContent>
+      </Dialog>
+      <View
+        style={[
+          tw`z-20 absolute mr-1 right-0 top-[22] bg-[#ffffff] dark:bg-[#000000] rounded-lg ${
+            menu ? "px-3 py-2" : ""
+          }`,
+          { display: menu ? "flex" : "none" },
+        ]}
+      >
+        <TouchableHighlight onPress={handleDelete} style={tw`z-20`}>
+          <View style={[tw`py-1`, { display: menu ? "flex" : "none" }]}>
+            <Text style={tw`text-[#000000] text-lg dark:text-[#ffffff]`}>
+              Delete Album
+            </Text>
+          </View>
+        </TouchableHighlight>
+        <TouchableHighlight
+          onPress={() => setScaleAnimationDialog(true)}
+          style={tw`z-20`}
+        >
+          <View style={[tw`py-1`, { display: menu ? "flex" : "none" }]}>
+            <Text style={tw`text-[#000000] text-lg dark:text-[#ffffff]`}>
+              Rename Album
+            </Text>
+          </View>
+        </TouchableHighlight>
+      </View>
     </SafeAreaView>
   );
 }
