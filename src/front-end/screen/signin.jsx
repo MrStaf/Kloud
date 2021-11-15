@@ -3,6 +3,7 @@ import { Text, View, Image, Pressable, TouchableHighlight } from "react-native";
 import tw from "twrnc";
 import { StatusBar } from "expo-status-bar";
 import save from "./../functions/save";
+
 // Images
 import logo from "./../assets/logo.png";
 
